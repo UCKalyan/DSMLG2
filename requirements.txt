@@ -1,0 +1,11 @@
+tensorflow
+numpy
+scikit-learn
+SimpleITK
+nibabel
+nilearn
+matplotlib
+pyyaml
+tqdm
+scikit-image
+medpy

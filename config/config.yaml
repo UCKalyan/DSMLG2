@@ -1,0 +1,58 @@
+# ------------------- Profile Configuration -------------------
+# Use 'gpu_high_mem' for high-end GPUs, 'gpu_low_mem' for cards with less VRAM,
+# and 'cpu' for running without a dedicated GPU.
+active_profile: cpu #gpu_high_mem
+
+# ------------------- Hardware Profiles -------------------
+gpu_high_mem:
+  input_shape: [128, 128, 4]
+  volume_shape: [128, 128, 128, 4]
+  batch_size: 16
+  encoder: ResNet34
+  dtype: 'float64' # Use float64 for high precision on powerful hardware
+
+gpu_low_mem:
+  input_shape: [96, 96, 4]
+  volume_shape: [96, 96, 96, 4]
+  batch_size: 8
+  encoder: "default"
+  dtype: 'float32' # Use float32 to conserve memory
+
+cpu:
+  input_shape: [64, 64, 4]
+  volume_shape: [64, 64, 64, 4]
+  batch_size: 2
+  encoder: "default"
+  dtype: 'float32' # float32 is sufficient and faster on CPU
+
+# ------------------- General Model Configuration -------------------
+model: UNET2D # Options: UNET2D, UNET3D, Classifier3D
+output_type: segmentation # benign_vs_malignant or segmentation
+# BraTS labels: 1: Necrotic/Non-Enhancing, 2: Edema, 4: Enhancing Tumor
+# We use 4 classes to include the background (0)
+num_classes: 4
+
+# ------------------- Training Configuration -------------------
+loss_function: "Dice + CrossEntropy"
+epochs: 2 #100
+learning_rate: 0.001
+early_stopping_patience: 15
+
+# ------------------- Data Configuration -------------------
+data_path: "/Users/kalyan/Documents/Software/segmentation-project/data/processed/BraTS2020_Train_Test/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
+ # Path to the main BraTS2020 dataset folder
+processed_data_path: "./processed_data"
+train_val_test_split: [0.7, 0.15, 0.15] # Split for patient IDs
+slice_axis: 'z' # Axis for 2D slicing ('x', 'y', or 'z')
+
+# ------------------- Augmentation Configuration -------------------
+augmentations:
+  flip: true
+  rotate: true
+  intensity_shift: true
+
+# ------------------- Inference & Evaluation Configuration -------------------
+prediction_output_path: "./predictions"
+evaluation_output_path: "./evaluation_results"
+# DSC thresholds for evaluation
+dsc_thresholds: [0, 0.25, 0.50, 0.75]
