@@ -47,3 +47,6 @@ logs/**
 # data
 *.npy
 *.tfrecord
+
+#config ignore
+*.yaml
