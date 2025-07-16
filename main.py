@@ -11,6 +11,7 @@ from training.trainer2d import Trainer2D
 from training.trainer3d_cls import Trainer3DClassifier
 from training.trainer3d_seg import Trainer3DSegmentation
 from inference.predict2d import Predictor2D
+from inference.predictor_3d import Predictor3D
 from inference.reconstruct3d import Reconstructor3D
 from inference.visualizer import Visualizer
 from evaluation.evaluator import Evaluator
@@ -43,7 +44,6 @@ def main(args):
 
     if args.mode == 'preprocess':
         logger.info("----- Running Preprocessing -----")
-        # Pass the entire config object to the preprocessor
         preprocessor = Preprocessor(config=config)
         preprocessor.run()
 
@@ -77,6 +77,7 @@ def main(args):
         ground_truth_seg = load_npy(os.path.join(patient_data_path, 'segmentation.npy'))
         
         visualizer = Visualizer(config)
+        flair_volume = volume[..., 3] # Use FLAIR for background visualization
 
         if config['model'] == 'UNET2D':
             predictor = Predictor2D(config, model_path='unet2d_best.keras')
@@ -86,15 +87,24 @@ def main(args):
             reconstructed_vol = reconstructor.stack_slices(predicted_slices, volume.shape)
             post_processed_vol = reconstructor.post_process(reconstructed_vol)
             
-            # Visualize a few slices
             logger.info("Generating slice visualizations...")
             for i in range(len(predicted_slices)):
-                 if np.sum(ground_truth_seg[:,:,i]) > 0: # Only visualize slices with tumors
-                    visualizer.plot_slice_comparison(args.patient_id, mri_slices[i], ground_truth_seg[:,:,i], np.argmax(predicted_slices[i], axis=-1), i)
+                 if np.sum(ground_truth_seg[..., i]) > 0:
+                    visualizer.plot_slice_comparison(args.patient_id, mri_slices[i], ground_truth_seg[..., i], np.argmax(predicted_slices[i], axis=-1), i)
             
-            # Visualize the 3D reconstruction
-            flair_volume = volume[:, :, :, 3] # Use FLAIR for background
             visualizer.plot_3d_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+
+        elif config['model'] == 'UNET3D':
+            predictor = Predictor3D(config, model_path='unet3d_seg_best.keras')
+            predicted_seg = predictor.predict_volume(volume)
+            post_processed_vol = Reconstructor3D(config).post_process(predicted_seg)
+            
+            logger.info("Generating 3D visualizations...")
+            visualizer.plot_3d_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+        
+        else:
+            logger.warning(f"Prediction for {config['model']} is not fully implemented in this script.")
+
 
     elif args.mode == 'evaluate':
         logger.info(f"----- Running Evaluation for model: {config['model']} -----")

@@ -34,8 +34,8 @@ class BratsDataset3D:
         volume = tf.io.parse_tensor(example['volume'], out_type=tf.float32)
         
         # --- THIS IS THE FIX ---
-        # Match the data type used when writing the TFRecord (int32)
-        segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.int32)
+        # Match the data type used when writing the TFRecord (uint8)
+        segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.uint8)
         # ----------------------
 
         label = tf.io.parse_tensor(example['label'], out_type=tf.float32)

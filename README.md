@@ -82,17 +82,13 @@ brats_unet3d_project/
 The `main.py` script is the main entry point for running different parts of the pipeline.
 
 ### Preprocessing Data
-Ensure to set the Folder where dataset is present in config.yaml.
-data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
-
     ```bash
     python main.py --mode preprocess
     ```
+Ensure to set the Folder where dataset is present in config.yaml.
+data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
 
 ### tfrecords ## are empty
-ERROR - TFRecord directory './processed_data/tfrecords' is empty or does not exist.
-Please run the conversion step first using: python main.py --mode convert_to_tfrecord
-
     ```bash
     python main.py --mode convert_to_tfrecord
     ```

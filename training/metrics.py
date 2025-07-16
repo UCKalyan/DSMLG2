@@ -70,6 +70,22 @@ def specificity(y_true, y_pred):
     specificity_val = tn / (tn + fp + tf.keras.backend.epsilon())
     return specificity_val
 
+def get_custom_objects():
+    """
+    Returns a dictionary of all custom functions for loading Keras models.
+    """
+    return {
+        "combined_loss": combined_loss,
+        "dice_coef": dice_coef,
+        "iou": iou,
+        "precision": precision,
+        "sensitivity": sensitivity,
+        "specificity": specificity,
+        "dice_coef_necrotic": dice_coef_necrotic,
+        "dice_coef_edema": dice_coef_edema,
+        "dice_coef_enhancing": dice_coef_enhancing,
+    }
+
 def calculate_hausdorff(y_true, y_pred):
     """
     Calculates the 95th percentile Hausdorff distance.

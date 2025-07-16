@@ -1,4 +1,7 @@
 import numpy as np
+from utils.logger import get_logger
+
+logger = get_logger("Slicer")
 
 class Slicer:
     """
@@ -13,15 +16,13 @@ class Slicer:
     def slice_volume(self, volume, segmentation=None):
         """
         Slices a 3D volume (and optionally its segmentation mask) into 2D slices.
-
-        Returns:
-            A list of 2D slices. If segmentation is provided, returns a list of
-            (slice, seg_slice) tuples.
+        This method is primarily for generating training data.
         """
         slices = []
-        num_slices = volume.shape[self.axis]
+        num_total_slices = volume.shape[self.axis]
+        logger.debug(f"[SLICER] Slicing along axis={self.axis} with {num_total_slices} total slices")
 
-        for i in range(num_slices):
+        for i in range(num_total_slices):
             if self.axis == 0:
                 vol_slice = volume[i, :, :, :]
                 seg_slice = segmentation[i, :, :] if segmentation is not None else None
@@ -38,4 +39,29 @@ class Slicer:
                     slices.append((vol_slice, seg_slice))
                 else:
                     slices.append(vol_slice)
+        
+        logger.debug(f"[SLICER] Returning {len(slices)} non-empty slices")
         return slices
+
+    def slice_for_prediction(self, volume):
+        """
+        Slices a 3D volume for prediction, returning both the model input slices
+        and the corresponding visualization slices.
+        """
+        model_input_slices = []
+        viz_slices = []
+        num_total_slices = volume.shape[self.axis]
+
+        for i in range(num_total_slices):
+            if self.axis == 0:
+                vol_slice = volume[i, :, :, :]
+            elif self.axis == 1:
+                vol_slice = volume[:, i, :, :]
+            else: # axis == 2
+                vol_slice = volume[:, :, i, :]
+            
+            model_input_slices.append(vol_slice)
+            # Assuming FLAIR is the last channel (index 3) and is best for visualization
+            viz_slices.append(vol_slice[:, :, 3])
+            
+        return model_input_slices, viz_slices
