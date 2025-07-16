@@ -4,7 +4,7 @@ This project provides a complete pipeline for brain tumor analysis on the BraTS 
 
 ## Project Structure
 
-
+```bash
 brats_unet3d_project/
 ├── config/
 │   └── config.yaml
@@ -33,7 +33,7 @@ brats_unet3d_project/
 ├── requirements.txt
 ├── install_dependencies.bat
 └── README.md
-
+```
 
 ## Features
 
@@ -72,9 +72,10 @@ brats_unet3d_project/
     Download the BraTS 2020 dataset and place it in a directory. Update the `data_path` in `config/config.yaml` to point to your dataset location.
 
 5. Ensure atleast 50GB of free space.
-6.  in config.yaml -> active_profile : gpu_high_mem # only if you have GPU and RAM
-                      epochs : 100 
-                      data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
+6.  in config.yaml -> 
+* active_profile : gpu_high_mem # only if you have GPU and RAM
+* epochs : 100 
+* data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
 
 ## Usage
 
@@ -116,14 +117,14 @@ rm -R ./processed_data/.DS_Store if required.
 
 ### Inference
 
-* **Run 2D Segmentation and 3D Reconstruction:** BraTS20_Training_356
+* **Run 2D Segmentation and 3D Reconstruction:** eg:- BraTS20_Training_356
     ```bash
     python main.py --mode predict --model UNET2D --patient_id <ID_of_Patient>
     ```
 
-* **Run 2D Segmentation and 3D Reconstruction:** BraTS20_Training_356
+* **Run 2D Segmentation and 3D Reconstruction:** eg:-BraTS20_Training_356
     ```bash
-    python main.py --mode predict --model UNET2D --patient_id <ID_of_Patient>
+    python main.py --mode predict --model UNET3D --patient_id <ID_of_Patient>
     ```
 ### Evaluation
 
