@@ -189,33 +189,4 @@ Integrating 3D Context:
 The inference/reconstruct3d.py file handles the integration of 3D context. The Reconstructor3D class first uses the stack_slices method to reassemble the predicted 2D slices back into a 3D volume.
 
 Crucially, the post_process method then applies 3D morphological operations (remove_small_objects and binary_fill_holes) to the reconstructed 3D volume. These operations help ensure spatial consistency and remove artifacts across slices, effectively integrating 3D context after the 2D predictions. While it's not a hybrid model that learns 3D features during inference, it's a common and effective post-processing strategy to achieve 3D coherence.
-## Changes Made
 
-tfrecord_writer.py - lot of changes due to unit8 vs int32
-predict2d.py updated  def predict_volume(self, volume):
-
-dataset_loader.py 
-    BratsDataset3D
-    def _parse_tfrecord_fn(self, example):
-        segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.int32) # int8
-    BratsDataset2D
-
-    def _parse_tfrecord_fn(self, example):
-        label = tf.reshape(label, [1])
-
-trainer2d.py - missing imports
-    from utils.helpers import ensure_dir
-    import os
-    import matplotlib.pyplot as plt
-
-trainer3d_seg.py udpated the metrics and relavent import
-trainer2d.py
-        #steps_per_epoch = math.ceil((train_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
-        #validation_steps = math.ceil((val_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
-        steps_per_epoch = 100
-        validation_steps = 20
-trainer3d_cls.py
-        #steps_per_epoch = math.ceil(train_loader.dataset_size / self.config['batch_size'])
-        #validation_steps = math.ceil(val_loader.dataset_size / self.config['batch_size'])
-        steps_per_epoch = 100
-        validation_steps = 20
