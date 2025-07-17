@@ -127,19 +127,20 @@ rm -R ./processed_data/.DS_Store if required.
     python main.py --mode predict --model UNET3D --patient_id BraTS20_Training_XXX
     ```
 * **Run 3D Classification :** eg:-BraTS20_Training_356
-```bash
+    ```bash
     python main.py --mode predict --model CLASSIFIER3D --patient_id BraTS20_Training_XXX
     ```
 ### Evaluation
 
-* **Evaluate a trained model:**
+* **Evaluate a trained UNET2D model:**
     ```bash
     python main.py --mode evaluate --model UNET2D
     ```
-
+* **Evaluate a trained UNET3D model:**
     ```bash
     python main.py --mode evaluate --model UNET3D
     ```
+* **Evaluate a trained CLASSIFIER3D model:**
     ```bash
     python main.py --mode evaluate --model CLASSIFIER3D
     ```
