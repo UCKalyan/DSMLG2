@@ -35,7 +35,12 @@ class BratsDataset3D:
         
         # --- THIS IS THE FIX ---
         # Match the data type used when writing the TFRecord (uint8)
-        segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.uint8)
+        if self.config['output_type'] == 'benign_vs_malignant':
+            print('Using uint8')
+            segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.uint8)
+        else:
+            print('Using uint8')
+            segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.uint8)
         # ----------------------
 
         label = tf.io.parse_tensor(example['label'], out_type=tf.float32)

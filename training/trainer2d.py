@@ -29,13 +29,14 @@ class Trainer2D:
         train_dataset = train_loader.get_dataset(self.config['batch_size'])
         val_dataset = val_loader.get_dataset(self.config['batch_size'])
 
-        # Redefine an epoch to be a more reasonable size.
-        avg_slices_per_patient = 64
-        
-        #steps_per_epoch = math.ceil((train_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
-        #validation_steps = math.ceil((val_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
-        steps_per_epoch = 100
-        validation_steps = 20
+        if self.config['active_profile'] == 'cpu':
+            steps_per_epoch = self.config['steps_per_epoch']
+            validation_steps = self.config['validation_steps']
+        else:
+            # Redefine an epoch to be a more reasonable size.
+            avg_slices_per_patient = 64
+            steps_per_epoch = math.ceil((train_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
+            validation_steps = math.ceil((val_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
 
         logger.info(f"Number of training patients: {train_loader.dataset_size}")
         logger.info(f"Number of validation patients: {val_loader.dataset_size}")

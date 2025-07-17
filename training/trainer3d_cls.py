@@ -26,10 +26,12 @@ class Trainer3DClassifier:
         val_dataset = val_loader.get_dataset(self.config['batch_size'])
 
         # Calculate steps
-        #steps_per_epoch = math.ceil(train_loader.dataset_size / self.config['batch_size'])
-        #validation_steps = math.ceil(val_loader.dataset_size / self.config['batch_size'])
-        steps_per_epoch = 50
-        validation_steps = 10
+        if self.config['active_profile'] == 'cpu':
+            steps_per_epoch = self.config['steps_per_epoch_classification']
+            validation_steps = self.config['validation_steps_classification']
+        else:
+            steps_per_epoch = math.ceil(train_loader.dataset_size / self.config['batch_size'])
+            validation_steps = math.ceil(val_loader.dataset_size / self.config['batch_size'])
         
         logger.info(f"Training with {steps_per_epoch} steps per epoch and {validation_steps} validation steps.")
 

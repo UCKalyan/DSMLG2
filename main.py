@@ -113,6 +113,8 @@ def main(args):
             evaluator.evaluate_2d_model('unet2d_best.keras')
         elif config['model'] == 'UNET3D':
             evaluator.evaluate_3d_model('unet3d_seg_best.keras')
+        elif config['model'] == 'CLASSIFIER3D':
+            evaluator.evaluate_3d_classifier_model('classifier3d_best.keras')
         else:
             logger.error(f"Evaluation not implemented for model type: {config['model']}")
 

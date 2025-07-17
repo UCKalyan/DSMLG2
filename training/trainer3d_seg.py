@@ -32,10 +32,12 @@ class Trainer3DSegmentation:
         #steps_per_epoch = math.ceil(train_loader.dataset_size / self.config['batch_size'])
         #validation_steps = math.ceil(val_loader.dataset_size / self.config['batch_size'])
 
-        #steps_per_epoch = math.ceil((train_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
-        #validation_steps = math.ceil((val_loader.dataset_size * avg_slices_per_patient) / self.config['batch_size'])
-        steps_per_epoch = 50
-        validation_steps = 10
+        if self.config['active_profile'] == 'cpu':
+            steps_per_epoch = self.config['steps_per_epoch_3d']
+            validation_steps = self.config['validation_steps_3d']
+        else:
+            steps_per_epoch = math.ceil(train_loader.dataset_size / self.config['batch_size'])
+            validation_steps = math.ceil(val_loader.dataset_size / self.config['batch_size'])
 
         # Compile model
         self.model.compile(

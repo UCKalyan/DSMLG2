@@ -24,6 +24,14 @@ cpu:
   batch_size: 2
   encoder: "default"
   dtype: 'float32' # float32 is sufficient and faster on CPU
+  steps_per_epoch: 100
+  validation_steps: 20
+  steps_per_epoch_3d: 50
+  validation_steps_3d: 10
+  steps_per_epoch_classification: 50
+  validation_steps_classification: 10
+
+
 
 # ------------------- General Model Configuration -------------------
 model: UNET2D # Options: UNET2D, UNET3D, Classifier3D
@@ -31,6 +39,7 @@ output_type: segmentation # benign_vs_malignant or segmentation
 # BraTS labels: 1: Necrotic/Non-Enhancing, 2: Edema, 4: Enhancing Tumor
 # We use 4 classes to include the background (0)
 num_classes: 4
+num_classification_classes: 2 # Example: 2 for binary classification (tumor/no-tumor)
 
 # ------------------- Training Configuration -------------------
 loss_function: "Dice + CrossEntropy"
@@ -55,4 +64,7 @@ augmentations:
 prediction_output_path: "./predictions"
 evaluation_output_path: "./evaluation_results"
 # DSC thresholds for evaluation
-dsc_thresholds: [0, 0.25, 0.50, 0.75]
+dsc_thresholds: [0, 0.25, 0.50, 0.75, 1]
+
+# ------------------- Logging Configuration -------------------
+log_level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL

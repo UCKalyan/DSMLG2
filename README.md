@@ -115,18 +115,29 @@ rm -R ./processed_data/.DS_Store if required.
 
 * **Run 2D Segmentation and 3D Reconstruction:** eg:- BraTS20_Training_356
     ```bash
-    python main.py --mode predict --model UNET2D --patient_id <ID_of_Patient>
+    python main.py --mode predict --model UNET2D --patient_id BraTS20_Training_XXX
     ```
 
-* **Run 2D Segmentation and 3D Reconstruction:** eg:-BraTS20_Training_356
+* **Run 3D Segmentation and 3D Reconstruction:** eg:-BraTS20_Training_356
     ```bash
-    python main.py --mode predict --model UNET3D --patient_id <ID_of_Patient>
+    python main.py --mode predict --model UNET3D --patient_id BraTS20_Training_XXX
+    ```
+* **Run 3D Classification :** eg:-BraTS20_Training_356
+    ```bash
+    python main.py --mode predict --model CLASSIFIER3D --patient_id BraTS20_Training_XXX
     ```
 ### Evaluation
 
 * **Evaluate a trained model:**
     ```bash
     python main.py --mode evaluate --model UNET2D
+    ```
+
+    ```bash
+    python main.py --mode evaluate --model UNET3D
+    ```
+    ```bash
+    python main.py --mode train --model CLASSIFIER3D
     ```
 
 ## Configuration
@@ -164,6 +175,16 @@ Accurate brain tumor segmentation requires understanding the spatial context of 
 Clinical Decision Making:
 Radiologists use all three planes when manually segmenting tumors for diagnosis and treatment planning. Deep learning models should ideally mimic this process. 
 
+### PostProcessing Implemented to processing slices individually with a 2D U-Net and then integrating 3D context
+Processing Slices Individually with a 2D U-Net:
+
+The inference/predict2d.py file, specifically the Predictor2D class, is designed to perform 2D predictions. Its predict_volume method iterates through 2D slices extracted from a 3D volume (model_input_slices) and uses a 2D Keras model (self.model.predict(s_expanded, verbose=0)) to get predictions for each slice. This confirms the "processing slices individually with a 2D U-Net" part.
+
+Integrating 3D Context:
+
+The inference/reconstruct3d.py file handles the integration of 3D context. The Reconstructor3D class first uses the stack_slices method to reassemble the predicted 2D slices back into a 3D volume.
+
+Crucially, the post_process method then applies 3D morphological operations (remove_small_objects and binary_fill_holes) to the reconstructed 3D volume. These operations help ensure spatial consistency and remove artifacts across slices, effectively integrating 3D context after the 2D predictions. While it's not a hybrid model that learns 3D features during inference, it's a common and effective post-processing strategy to achieve 3D coherence.
 ## Changes Made
 
 tfrecord_writer.py - lot of changes due to unit8 vs int32
