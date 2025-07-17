@@ -71,7 +71,7 @@ brats_unet3d_project/
     ```
 
 4.  **Download BraTS 2020 Data:**
-    Download the BraTS 2020 dataset and place it in a directory. Update the `data_path` in `config/config.yaml` to point to your dataset location.
+    Download the BraTS 2020 dataset and place it in a directory. Update the `data_path` in `config/config.yaml` to point to dataset location.
 
 5. Ensure atleast 50GB of free space.
 6.  in config.yaml -> 
@@ -190,3 +190,49 @@ The inference/reconstruct3d.py file handles the integration of 3D context. The R
 
 Crucially, the post_process method then applies 3D morphological operations (remove_small_objects and binary_fill_holes) to the reconstructed 3D volume. These operations help ensure spatial consistency and remove artifacts across slices, effectively integrating 3D context after the 2D predictions. While it's not a hybrid model that learns 3D features during inference, it's a common and effective post-processing strategy to achieve 3D coherence.
 
+### Best Image Format for Medical Imaging
+The best image format for medical imaging among .nii.gz, .npy, and .tfrecord depends on the specific requirements of the task at hand.
+
+* .nii.gz (NIfTI-1 compressed): This format is widely used in medical imaging, particularly in neuroimaging. It supports 3D and 4D data, includes metadata such as affine transformations for spatial orientation, and is compatible with many medical imaging tools and libraries like FSL, SPM, and NiBabel. The .nii.gz format is particularly useful for preserving the spatial and anatomical context of images, making it ideal for applications such as MRI and fMRI analysis. It is also supported by MedPy via SimpleITK.
+* .npy (NumPy array): This format is native to Python’s NumPy library and is useful for storing multi-dimensional arrays. It is simple and efficient for loading and saving data within Python workflows. However, it lacks support for metadata such as spatial orientation or acquisition parameters, which are crucial in medical imaging. Therefore, .npy is more suitable for intermediate data storage or when metadata is managed separately.
+* .tfrecord (TensorFlow Record): This is a binary file format used by TensorFlow for storing large datasets efficiently. It is particularly useful for machine learning pipelines where data needs to be read in a streaming fashion. While it supports flexible data structures and can store both images and labels, it does not inherently support metadata about the imaging context. It is more commonly used in deep learning applications but requires additional effort to manage metadata.
+
+In summary, if the task involves standard medical imaging with a need for spatial metadata and compatibility with existing tools, .nii.gz is the best choice.
+ If the workflow is primarily in Python and metadata is not critical, .npy may be sufficient. For deep learning pipelines using TensorFlow, .tfrecord is advantageous but requires careful handling of metadata separately.
+
+### Overall Performance Metrics for MODEL2D
+This table summarizes the main performance indicators for model across all classes.
+
+# Metric	Value	Interpretation
+Loss	0.414	The overall error value the model tried to minimize.
+Dice Coefficient	0.631	A good measure of overlap between prediction and target.
+IoU (Jaccard)	0.495	Another overlap metric, closely related to the Dice score.
+Precision	0.670	The model is correct in 67% of its positive predictions.
+Sensitivity (Recall)	0.638	The model correctly identifies 63.8% of the actual positive cases.
+Specificity	0.995	Excellent. The model is very good at correctly identifying background pixels.
+
+
+# Tumor Sub-Region Performance
+Model was also evaluated on three specific sub-regions, likely related to brain tumor segmentation (e.g., from the BraTS dataset).
+
+# Metric	Value
+dice_coef_necrotic	0.997
+dice_coef_edema	0.997
+dice_coef_enhancing	0.997
+
+# Interpretation:
+The Dice scores for the individual tumor components (necrotic core, edema, and enhancing tumor) are exceptionally high. A score of 0.997 suggests a near-perfect segmentation for these specific labels in the evaluated sample.
+
+# Dice Score at Different Thresholds
+This is a crucial part of the analysis. It shows how the Dice Coefficient changes when you adjust the confidence threshold for making a positive prediction.
+
+## Metric	Value
+    dice_coef_thresh_0	0.013
+    dice_coef_thresh_25	0.706
+    dice_coef_thresh_50	0.708
+    dice_coef_thresh_75	0.703
+    dice_coef_thresh_100	0.036
+
+
+Key Takeaway:
+Model achieves its best performance with a Dice Score of 0.708 when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
