@@ -84,14 +84,14 @@ brats_unet3d_project/
 The `main.py` script is the main entry point for running different parts of the pipeline.
 
 ### Preprocessing Data
-* **Prprocess Dataset to .nyp format:** 
+* **Preprocess Dataset to .nyp format:** 
     ```bash
     python main.py --mode preprocess
     ```
 Ensure to set the Folder where dataset is present in config.yaml.
 data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
 
-### tfrecords ## are empty
+### Convert to TFRecords
 * **TFRecords for Production:** 
     ```bash
     python main.py --mode convert_to_tfrecord
