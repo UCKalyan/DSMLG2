@@ -234,5 +234,5 @@ This is a crucial part of the analysis. It shows how the Dice Coefficient change
     dice_coef_thresh_100	    0.036
 
 
-Key Takeaway:
+## Key Takeaway:
 Model achieves its best performance with a Dice Score of 0.708 when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
