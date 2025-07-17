@@ -84,6 +84,7 @@ brats_unet3d_project/
 The `main.py` script is the main entry point for running different parts of the pipeline.
 
 ### Preprocessing Data
+* **Prprocess Dataset to .nyp format:** 
     ```bash
     python main.py --mode preprocess
     ```
@@ -91,6 +92,7 @@ Ensure to set the Folder where dataset is present in config.yaml.
 data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
 
 ### tfrecords ## are empty
+* **TFRecords for Production:** 
     ```bash
     python main.py --mode convert_to_tfrecord
     ```
@@ -125,7 +127,7 @@ rm -R ./processed_data/.DS_Store if required.
     python main.py --mode predict --model UNET3D --patient_id BraTS20_Training_XXX
     ```
 * **Run 3D Classification :** eg:-BraTS20_Training_356
-    ```bash
+```bash
     python main.py --mode predict --model CLASSIFIER3D --patient_id BraTS20_Training_XXX
     ```
 ### Evaluation
@@ -139,7 +141,7 @@ rm -R ./processed_data/.DS_Store if required.
     python main.py --mode evaluate --model UNET3D
     ```
     ```bash
-    python main.py --mode train --model CLASSIFIER3D
+    python main.py --mode evaluate --model CLASSIFIER3D
     ```
 
 ## Configuration
