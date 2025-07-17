@@ -200,10 +200,10 @@ The best image format for medical imaging among .nii.gz, .npy, and .tfrecord dep
 In summary, if the task involves standard medical imaging with a need for spatial metadata and compatibility with existing tools, .nii.gz is the best choice.
  If the workflow is primarily in Python and metadata is not critical, .npy may be sufficient. For deep learning pipelines using TensorFlow, .tfrecord is advantageous but requires careful handling of metadata separately.
 
-### Overall Performance Metrics for MODEL2D
+# Overall Performance Metrics for MODEL2D
 This table summarizes the main performance indicators for model across all classes.
 
-# Metric	Value	Interpretation
+### Metric	Value	Interpretation
     Loss	                    0.414	The overall error value the model tried to minimize.
     Dice Coefficient	    0.631	A good measure of overlap between prediction and target.
     IoU (Jaccard)	            0.495	Another overlap metric, closely related to the Dice score.
@@ -212,21 +212,21 @@ This table summarizes the main performance indicators for model across all class
     Specificity	            0.995	Excellent. The model is very good at correctly identifying background pixels.
 
 
-# Tumor Sub-Region Performance
+### Tumor Sub-Region Performance
 Model was also evaluated on three specific sub-regions, likely related to brain tumor segmentation (e.g., from the BraTS dataset).
 
-# Metric	Value
+### Metric	Value
     dice_coef_necrotic	0.997
     dice_coef_edema         0.997
     dice_coef_enhancing	0.997
 
-# Interpretation:
+### Interpretation:
 The Dice scores for the individual tumor components (necrotic core, edema, and enhancing tumor) are exceptionally high. A score of 0.997 suggests a near-perfect segmentation for these specific labels in the evaluated sample.
 
-# Dice Score at Different Thresholds
+## Dice Score at Different Thresholds
 This is a crucial part of the analysis. It shows how the Dice Coefficient changes when you adjust the confidence threshold for making a positive prediction.
 
-## Metric	Value
+# Metric	Value
     dice_coef_thresh_0	    0.013
     dice_coef_thresh_25	    0.706
     dice_coef_thresh_50	    0.708
