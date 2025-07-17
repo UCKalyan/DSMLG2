@@ -231,7 +231,7 @@ This is a crucial part of the analysis. It shows how the Dice Coefficient change
     dice_coef_thresh_25	    0.706
     dice_coef_thresh_50	    0.708
     dice_coef_thresh_75	    0.703
-    dice_coef_thresh_100	0.036
+    dice_coef_thresh_100	    0.036
 
 
 Key Takeaway:
