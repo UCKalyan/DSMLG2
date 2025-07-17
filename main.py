@@ -12,6 +12,7 @@ from training.trainer3d_cls import Trainer3DClassifier
 from training.trainer3d_seg import Trainer3DSegmentation
 from inference.predict2d import Predictor2D
 from inference.predictor_3d import Predictor3D
+from inference.predictor_3d_cls import Predictor3DClassifier
 from inference.reconstruct3d import Reconstructor3D
 from inference.visualizer import Visualizer
 from evaluation.evaluator import Evaluator
@@ -102,6 +103,19 @@ def main(args):
             logger.info("Generating 3D visualizations...")
             visualizer.plot_3d_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
         
+        elif config['model'] == 'CLASSIFIER3D':
+            logger.info(f"Running prediction for patient: {args.patient_id}")
+            
+            # Instantiate the predictor
+            predictor = Predictor3DClassifier(config, model_path='classifier3d_best.keras')
+            
+            # Load the ground truth label
+            true_label_arr = load_npy(os.path.join(patient_data_path, 'label.npy'))
+            true_class = int(true_label_arr[0])
+
+            # Perform prediction and generate all outputs
+            predictor.predict_and_visualize(volume, args.patient_id, true_class)
+
         else:
             logger.warning(f"Prediction for {config['model']} is not fully implemented in this script.")
 

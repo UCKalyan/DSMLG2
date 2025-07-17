@@ -204,7 +204,12 @@ class Evaluator:
             custom_objects=get_custom_objects()
         )
 
-        test_loader = BratsDataset3D(self.config, mode='test') # Assuming task='classification'
+        # Create a temporary config for the loader to ensure it yields classification labels
+        eval_config = self.config.copy()
+        eval_config['output_type'] = 'benign_vs_malignant'
+        logger.info("Overriding data loader to yield classification labels for evaluation.")
+        
+        test_loader = BratsDataset3D(eval_config, mode='test') # Use the modified config
         test_dataset = test_loader.get_dataset(self.config['batch_size'])
 
         logger.info(f"Evaluating on {test_loader.dataset_size} test patients for classification.")
@@ -216,9 +221,9 @@ class Evaluator:
         for x_batch, y_true_batch in tqdm(test_dataset, desc="Collecting Classifier Predictions"):
             y_pred_batch = model.predict(x_batch, verbose=0)
             all_y_true.extend(y_true_batch.numpy())
-            all_y_pred_probs.extend(y_pred_batch.numpy())
+            all_y_pred_probs.extend(y_pred_batch)
 
-        y_true_flat = np.array(all_y_true).flatten() # Flatten if one-hot encoded to single label
+        y_true_flat = np.array(all_y_true).flatten()
         y_pred_probs_flat = np.array(all_y_pred_probs)
 
         # Convert probabilities to predicted classes

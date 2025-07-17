@@ -48,7 +48,9 @@ learning_rate: 0.001
 early_stopping_patience: 15
 
 # ------------------- Data Configuration -------------------
-data_path: "D://PES Mtech//Sem-3//Project//archive//BraTS2020_TrainingData//MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
+#data_path: "D://PES Mtech//Sem-3//Project//archive//BraTS2020_TrainingData//MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
+data_path: "/Users/kalyan/Documents/Software/segmentation-project/data/processed/BraTS2020_Train_Test/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
+
 # Path to the main BraTS2020 dataset folder
 processed_data_path: "./processed_data"
 train_val_test_split: [0.7, 0.15, 0.15] # Split for patient IDs

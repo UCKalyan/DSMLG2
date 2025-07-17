@@ -52,7 +52,9 @@ brats_unet3d_project/
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/UCKalyan/DSMLG2.git
+    ```
+    ```bash
     cd brats_unet3d_project
     ```
 
