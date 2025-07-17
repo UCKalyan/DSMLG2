@@ -204,21 +204,21 @@ In summary, if the task involves standard medical imaging with a need for spatia
 This table summarizes the main performance indicators for model across all classes.
 
 # Metric	Value	Interpretation
-Loss	0.414	The overall error value the model tried to minimize.
-Dice Coefficient	0.631	A good measure of overlap between prediction and target.
-IoU (Jaccard)	0.495	Another overlap metric, closely related to the Dice score.
-Precision	0.670	The model is correct in 67% of its positive predictions.
-Sensitivity (Recall)	0.638	The model correctly identifies 63.8% of the actual positive cases.
-Specificity	0.995	Excellent. The model is very good at correctly identifying background pixels.
+    Loss	0.414	The overall error value the model tried to minimize.
+    Dice Coefficient	0.631	A good measure of overlap between prediction and target.
+    IoU (Jaccard)	0.495	Another overlap metric, closely related to the Dice score.
+    Precision	0.670	The model is correct in 67% of its positive predictions.
+    Sensitivity (Recall)	0.638	The model correctly identifies 63.8% of the actual positive cases.
+    Specificity	0.995	Excellent. The model is very good at correctly identifying background pixels.
 
 
 # Tumor Sub-Region Performance
 Model was also evaluated on three specific sub-regions, likely related to brain tumor segmentation (e.g., from the BraTS dataset).
 
 # Metric	Value
-dice_coef_necrotic	0.997
-dice_coef_edema	0.997
-dice_coef_enhancing	0.997
+    dice_coef_necrotic	0.997
+    dice_coef_edema	0.997
+    dice_coef_enhancing	0.997
 
 # Interpretation:
 The Dice scores for the individual tumor components (necrotic core, edema, and enhancing tumor) are exceptionally high. A score of 0.997 suggests a near-perfect segmentation for these specific labels in the evaluated sample.
