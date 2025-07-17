@@ -217,7 +217,7 @@ Model was also evaluated on three specific sub-regions, likely related to brain 
 
 # Metric	Value
     dice_coef_necrotic	0.997
-    dice_coef_edema     0.997
+    dice_coef_edema         0.997
     dice_coef_enhancing	0.997
 
 # Interpretation:
