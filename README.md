@@ -204,11 +204,11 @@ In summary, if the task involves standard medical imaging with a need for spatia
 This table summarizes the main performance indicators for model across all classes.
 
 # Metric	Value	Interpretation
-    Loss	                0.414	The overall error value the model tried to minimize.
+    Loss	                    0.414	The overall error value the model tried to minimize.
     Dice Coefficient	    0.631	A good measure of overlap between prediction and target.
-    IoU (Jaccard)	        0.495	Another overlap metric, closely related to the Dice score.
+    IoU (Jaccard)	            0.495	Another overlap metric, closely related to the Dice score.
     Precision	            0.670	The model is correct in 67% of its positive predictions.
-    Sensitivity (Recall)	0.638	The model correctly identifies 63.8% of the actual positive cases.
+    Sensitivity (Recall)	    0.638	The model correctly identifies 63.8% of the actual positive cases.
     Specificity	            0.995	Excellent. The model is very good at correctly identifying background pixels.
 
 
@@ -217,7 +217,7 @@ Model was also evaluated on three specific sub-regions, likely related to brain 
 
 # Metric	Value
     dice_coef_necrotic	0.997
-    dice_coef_edema	    0.997
+    dice_coef_edema 0.997
     dice_coef_enhancing	0.997
 
 # Interpretation:
