@@ -281,7 +281,7 @@ This table summarizes the main performance indicators for model across all class
 | Sensitivity (Recall)     | 0.638          | 0.5420           |                    |
 | Specificity              | 0.995          | 0.9955           |                    |
 |                          |                |                  |                    |
-| dice_coef_et             | 0.000          | 0.6212           |                    |
+| dice_coef_et             | 0.692          | 0.6212           |                    |
 | dice_coef_tc             | 0.680          | 0.5789           |                    |
 | dice_coef_wt             | 0.710          | 0.9971           |                    |
 |                          |                |                  |                    |
