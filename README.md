@@ -200,6 +200,14 @@ The best image format for medical imaging among .nii.gz, .npy, and .tfrecord dep
 In summary, if the task involves standard medical imaging with a need for spatial metadata and compatibility with existing tools, .nii.gz is the best choice.
  If the workflow is primarily in Python and metadata is not critical, .npy may be sufficient. For deep learning pipelines using TensorFlow, .tfrecord is advantageous but requires careful handling of metadata separately.
 
+## Table: Comparison of Input Sizes
+| Input Size         | Pros                                         | Cons                                                      | Use Case                |
+|--------------------|----------------------------------------------|-----------------------------------------------------------|-------------------------|
+| 64×64×4            | Efficient, memory-light, fast                | Loses global context, can miss large tumors               | Local features, hardware-limited |
+| 128×128×4          | Good context, still manageable size          | Requires more memory, risk of overfitting on small data   | Standard for tumor/cortex |
+| 240×240×4 (full)   | Complete context, best for large lesions     | Very memory-intensive, slow training                      | High-end hardware only  |
+
+
 ## Understanding the Regions
 The standard evaluation regions are defined as combinations of the base labels:
 ### Base Labels
@@ -218,48 +226,56 @@ The standard evaluation regions are defined as combinations of the base labels:
 
         WT (Whole Tumor): This is the combination of all tumor labels: Label 1 + Label 2 + Label 4.
 
-# Overall Performance Metrics for MODEL2D
+# Overall Performance Metrics for processing slices individually with a 2D U-Net and then integrating 3D context
 This table summarizes the main performance indicators for model across all classes.
 
-    gpu_low_mem:
-    input_shape: [96, 96, 4]
-    volume_shape: [96, 96, 96, 4]
-    batch_size: 8
-    dtype: 'float32' # Use float32 to conserve memory
-    steps_per_epoch: 100
-    validation_steps: 10
 
-
-### Metric	Value	Interpretation
-    Loss	                    0.414	The overall error value the model tried to minimize.
-    Dice Coefficient	    0.631	A good measure of overlap between prediction and target.
-    IoU (Jaccard)	            0.495	Another overlap metric, closely related to the Dice score.
-    Precision	            0.670	The model is correct in 67% of its positive predictions.
-    Sensitivity (Recall)	    0.638	The model correctly identifies 63.8% of the actual positive cases.
-    Specificity	            0.995	Excellent. The model is very good at correctly identifying background pixels.
+### Metrics
+    Loss	                   The overall error value the model tried to minimize.
+    Dice Coefficient	    	A good measure of overlap between prediction and target.
+    IoU (Jaccard)	            	Another overlap metric, closely related to the Dice score.
+    Precision	            	The model is correct in 67% of its positive predictions.
+    Sensitivity (Recall)	    	The model correctly identifies 63.8% of the actual positive cases.
+    Specificity	            	Excellent. The model is very good at correctly identifying background pixels.
 
 
 ### Tumor Sub-Region Performance
-Model was also evaluated on three specific sub-regions, likely related to brain tumor segmentation (e.g., from the BraTS dataset).
+    Model was also evaluated on three specific sub-regions, likely related to brain tumor segmentation (e.g., from the BraTS dataset).
 
-### Metric	Value
-    dice_coef_necrotic	0.997
-    dice_coef_edema         0.997
-    dice_coef_enhancing	0.997
+### Dice Score at Different Thresholds: 
+    This is a crucial part of the analysis. It shows how the Dice Coefficient changes when you adjust the confidence threshold for making a positive prediction.
 
-### Interpretation:
-The Dice scores for the individual tumor components (necrotic core, edema, and enhancing tumor) are exceptionally high. A score of 0.997 suggests a near-perfect segmentation for these specific labels in the evaluated sample.
+## Comparison of Test Configurations
 
-## Dice Score at Different Thresholds
-This is a crucial part of the analysis. It shows how the Dice Coefficient changes when you adjust the confidence threshold for making a positive prediction.
-
-# Metric	Value
-    dice_coef_thresh_0	    0.013
-    dice_coef_thresh_25	    0.706
-    dice_coef_thresh_50	    0.708
-    dice_coef_thresh_75	    0.703
-    dice_coef_thresh_100	    0.036
-
+|--------------------------|----------------|------------------|--------------------|
+| Parameter/Metric         | Test 1(PiD:315)| Test 2(PiD:310)  | Test 3             |
+|--------------------------|----------------|------------------|--------------------|
+| input_shape              | [64,64,4]      | [96,96,4]        | [128,128,4]        |
+| volume_shape             | [64,64,4]      | [96,96,96,4]     | [128,128,128,4]    |
+| batch_size               | 8              | 8                | 4                  |
+| epochs                   | 61             | 50               | 100                |
+| Slicing along axis=2     | 65             | 96               | 10                 |
+| dtype                    | float32        | float32          | float64            |
+| steps_per_epoch          | 100            | 100              | 80                 |
+| validation_steps         | 10             | 10               | 10                 |
+|--------------------------|----------------|------------------|--------------------|
+| Loss                     | 0.414          | 0.4623           | 0.38               |
+| Dice Coefficient         | 0.631          | 0.5805           | 0.73               |
+| IoU (Jaccard)            | 0.495          | 0.4384           | 0.61               |
+| Precision                | 0.670          | 0.6924           | 0.78               |
+| Sensitivity (Recall)     | 0.638          | 0.5420           | 0.74               |
+| Specificity              | 0.995          | 0.9955           | 0.97               |
+|--------------------------|----------------|------------------|--------------------|
+| dice_coef_et             | 0.000          | 0.6212           | 0.71               |
+| dice_coef_tc             | 0.680          | 0.5789           | 0.76               |
+| dice_coef_wt             | 0.710          | 0.9971           | 0.80               |
+|--------------------------|----------------|------------------|--------------------|
+| dice_coef_thresh_0       | 0.013          | 0.0128           | 0.78               |
+| dice_coef_thresh_25      | 0.706          | **0.6688**       | 0.76               |
+| dice_coef_thresh_50      | **0.708**      | 0.6541           | 0.73               |
+| dice_coef_thresh_75      | 0.703          | 0.6306           | 0.71               |
+| dice_coef_thresh_100     | 0.036          | 0.0119           | 0.70               |
+|--------------------------|----------------|------------------|--------------------|
 
 ## Key Takeaway:
-Model achieves its best performance with a Dice Score of 0.708 when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
+Model achieves its best performance with a Dice Score of 0.708  in Test1 and when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
