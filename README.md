@@ -12,6 +12,9 @@ brats_unet3d_project/
 │   ├── brats2020_preprocess.py
 │   ├── slicer.py
 │   └── dataset_loader.py
+├── evaluation/
+│   ├── evaluator.py.py
+├── images/
 ├── models/
 │   ├── unet2d.py
 │   ├── unet3d.py
@@ -24,6 +27,8 @@ brats_unet3d_project/
 ├── inference/
 │   ├── predict2d.py
 │   ├── reconstruct3d.py
+│   ├── predictor_3d_cls.py
+│   ├── predictor_3d.py
 │   └── visualizer.py
 ├── utils/
 │   ├── logger.py
