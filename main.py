@@ -83,59 +83,65 @@ def main(args):
         flair_volume = volume[..., 3] # Use FLAIR for background visualization
 
         if config['model'] == 'UNET2D':
-                predictor = Predictor2D(config, model_path='unet2d_best.keras')
-                predicted_raw_slices, mri_slices = predictor.predict_volume(volume) # Renamed for clarity
+            predictor = Predictor2D(config, model_path='unet2d_best.keras')
+            # predicted_slices will now contain the thresholded masks from Predictor2D
+            predicted_slices, mri_slices = predictor.predict_volume(volume) 
 
-                reconstructor = Reconstructor3D(config)
-                reconstructed_vol = reconstructor.stack_slices(predicted_raw_slices, volume.shape)
-                post_processed_vol = reconstructor.post_process(reconstructed_vol)
-                
-                logger.info("Generating individual and composite slice visualizations from post-processed volume...")
-                
-                # Map string axis to integer index
-                axis_map = {'x': 0, 'y': 1, 'z': 2}
-                slice_axis_str = config['slice_axis'].lower() # Get the string, convert to lowercase for robustness
-                if slice_axis_str in axis_map:
-                    slice_axis_int = axis_map[slice_axis_str]
-                else:
-                    # Fallback if config has an integer directly, or raise error if invalid
-                    try:
-                        slice_axis_int = int(slice_axis_str)
-                    except ValueError:
-                        raise ValueError(f"Invalid slice_axis in config: {config['slice_axis']}. Must be 'x', 'y', 'z' or an integer (0, 1, 2).")
+            reconstructor = Reconstructor3D(config)
+            # stack_slices now expects already thresholded masks (from predicted_slices)
+            reconstructed_vol = reconstructor.stack_slices(predicted_slices, volume.shape) 
+            post_processed_vol = reconstructor.post_process(reconstructed_vol)
+            
+            logger.info("Generating individual and composite slice visualizations from post-processed volume...")
+            
+            # Map string axis to integer index
+            axis_map = {'x': 0, 'y': 1, 'z': 2}
+            slice_axis_str = config['slice_axis'].lower() # Get the string, convert to lowercase for robustness
+            if slice_axis_str in axis_map:
+                slice_axis_int = axis_map[slice_axis_str]
+            else:
+                # Fallback if config has an integer directly, or raise error if invalid
+                try:
+                    slice_axis_int = int(slice_axis_str)
+                except ValueError:
+                    raise ValueError(f"Invalid slice_axis in config: {config['slice_axis']}. Must be 'x', 'y', 'z' or an integer (0, 1, 2).")
 
-                num_slices = post_processed_vol.shape[slice_axis_int] # Use the determined slice axis with integer index
+            num_slices = post_processed_vol.shape[slice_axis_int] # Use the determined slice axis with integer index
 
-                for i in range(num_slices):
-                    # Extract slices for GT and Pred from the 3D volumes
-                    # Ensure slicing uses integer slice_axis_int
-                    if slice_axis_int == 2: # Z-axis (last dimension)
-                        gt_slice_i = ground_truth_seg[..., i]
-                        pred_slice_i = post_processed_vol[..., i]
-                    elif slice_axis_int == 1: # Y-axis (middle dimension)
-                        gt_slice_i = ground_truth_seg[:, i, :]
-                        pred_slice_i = post_processed_vol[:, i, :]
-                    else: # slice_axis_int == 0 (X-axis, first dimension)
-                        gt_slice_i = ground_truth_seg[i, :, :]
-                        pred_slice_i = post_processed_vol[i, :, :]
-                        
-                    mri_slice_i = mri_slices[i] # mri_slices are already prepared by Predictor2D's slicer
+            for i in range(num_slices):
+                # Extract slices for GT and Pred from the 3D volumes
+                # Ensure slicing uses integer slice_axis_int
+                if slice_axis_int == 2: # Z-axis (last dimension for BraTS data)
+                    gt_slice_i = ground_truth_seg[..., i]
+                    pred_slice_i = post_processed_vol[..., i]
+                elif slice_axis_int == 1: # Y-axis
+                    gt_slice_i = ground_truth_seg[:, i, :]
+                    pred_slice_i = post_processed_vol[:, i, :]
+                else: # slice_axis_int == 0 (X-axis)
+                    gt_slice_i = ground_truth_seg[i, :, :]
+                    pred_slice_i = post_processed_vol[i, :, :]
+                    
+                mri_slice_i = mri_slices[i] # mri_slices are already prepared by Predictor2D's slicer
 
-                    if np.sum(gt_slice_i) > 0: # Only plot slices with ground truth tumor
-                        visualizer.plot_slice_comparison(args.patient_id, mri_slice_i, gt_slice_i, pred_slice_i, i)
-                        visualizer.plot_slice_composite_comparison(args.patient_id, mri_slice_i, gt_slice_i, pred_slice_i, i)
-                
-                logger.info("Generating 3D visualizations for composite regions (ET, TC, WT)...")
-                visualizer.plot_3d_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+                if np.sum(gt_slice_i) > 0: # Only plot slices with ground truth tumor
+                    visualizer.plot_slice_comparison(args.patient_id, mri_slice_i, gt_slice_i, pred_slice_i, i)
+                    visualizer.plot_slice_composite_comparison(args.patient_id, mri_slice_i, gt_slice_i, pred_slice_i, i)
+            
+            logger.info("Generating 3D visualizations for individual components and composite regions...")
+            visualizer.plot_3d_individual_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+            visualizer.plot_3d_composite_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+
 
         elif config['model'] == 'UNET3D':
             predictor = Predictor3D(config, model_path='unet3d_seg_best.keras')
-            predicted_seg = predictor.predict_volume(volume)
-            post_processed_vol = Reconstructor3D(config).post_process(predicted_seg)
+            # predicted_seg will now be the thresholded and potentially resized mask
+            predicted_seg = predictor.predict_volume(volume) 
+            post_processed_vol = Reconstructor3D(config).post_process(predicted_seg) # Still apply post-processing
 
-            logger.info("Generating 3D visualizations for composite regions (ET, TC, WT)...")
-            visualizer.plot_3d_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol) # This function is updated internally
-        
+            logger.info("Generating 3D visualizations for individual components and composite regions...")
+            visualizer.plot_3d_individual_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+            visualizer.plot_3d_composite_reconstruction(args.patient_id, flair_volume, ground_truth_seg, post_processed_vol)
+
         elif config['model'] == 'CLASSIFIER3D':
             logger.info(f"Running prediction for patient: {args.patient_id}")
             

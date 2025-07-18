@@ -5,7 +5,7 @@ import numpy as np
 import os
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Patch
-import matplotlib as mpl
+import matplotlib as mpl # Import matplotlib for colormap utilities
 
 from utils.helpers import ensure_dir
 from utils.logger import get_logger
@@ -36,7 +36,7 @@ class Visualizer:
 
         # New composite region colors and legend elements
         self.composite_colors = {
-            'ET': '#0000FF', # Enhancing Tumor - Blue
+            'ET': '#0000FF', # Enhancing Tumor - Blue (same as individual ET for consistency)
             'TC': '#FF8C00', # Tumor Core (NCR + ET) - Orange
             'WT': '#8A2BE2'  # Whole Tumor (NCR + ED + ET) - Purple
         }
@@ -64,7 +64,7 @@ class Visualizer:
         showing the MRI, GT, Pred, and an overlay for individual tumor components.
         """
         fig, axes = plt.subplots(1, 4, figsize=(22, 5))
-        fig.suptitle(f'Patient {patient_id} - Slice {slice_idx}', fontsize=16)
+        fig.suptitle(f'Patient {patient_id} - Slice {slice_idx} - Individual Tumor Components', fontsize=16)
 
         # Safely normalize the MRI slice for visualization
         if mri_slice is not None:
@@ -179,7 +179,92 @@ class Visualizer:
         plt.close(fig)
 
 
-    def plot_3d_reconstruction(self, patient_id, original_mri, ground_truth_seg, predicted_seg):
+    def plot_3d_individual_reconstruction(self, patient_id, original_mri, ground_truth_seg, predicted_seg):
+        """
+        Generates and saves a comprehensive 3-view nilearn plot for the full 3D volume,
+        with consistent color mapping for INDIVIDUAL tumor sub-regions (NCR, ED, ET).
+        """
+        affine = np.eye(4) # Identity affine matrix
+        original_nii = nib.Nifti1Image(original_mri, affine)
+        
+        patient_viz_dir = os.path.join(self.output_path, patient_id)
+        ensure_dir(patient_viz_dir)
+        
+        # Find a good slice to display by looking for the largest tumor area
+        # If no tumor in GT, use the center of the volume
+        if np.sum(ground_truth_seg) > 0:
+            coords = np.argwhere(ground_truth_seg > 0)
+            center_coords = coords.mean(axis=0)
+        else:
+            center_coords = np.array(predicted_seg.shape) / 2
+
+        # --- Create the main plot ---
+        # Use plot_anat for background and then add overlays for segmentation classes
+        display_modes = ['z', 'x', 'y']
+        view_titles = ['Axial', 'Coronal', 'Sagittal']
+        
+        # Create a figure for Ground Truth and Prediction side-by-side
+        fig, axes = plt.subplots(2, 3, figsize=(18, 12)) # Increased height for better spacing
+        fig.suptitle(f'3D Segmentation Comparison - Patient {patient_id} - Individual Components', fontsize=20)
+
+        # Plot Ground Truth views
+        for i, (mode, title) in enumerate(zip(display_modes, view_titles)):
+            display_gt = plotting.plot_anat(
+                original_nii,
+                axes=axes[0, i],
+                display_mode=mode,
+                cut_coords=center_coords,
+                title=f'Ground Truth ({title})',
+                cmap='gray' # Background MRI in grayscale
+            )
+            # Add each class as an overlay with specific color
+            for class_idx, color in self.class_colors.items():
+                mask = (ground_truth_seg == class_idx).astype(np.int16)
+                if np.any(mask): # Only add overlay if the class is present in the mask
+                    display_gt.add_overlay(
+                        nib.Nifti1Image(mask, affine),
+                        cmap=ListedColormap([color]), # Use a single-color colormap
+                        transparency=0.6, # Changed from alpha to transparency
+                        vmin=0.5, # To ensure only 1s are colored
+                        vmax=1.5
+                    )
+            display_gt.annotate(size=10) # Add coordinate annotations
+
+        # Plot Prediction views
+        for i, (mode, title) in enumerate(zip(display_modes, view_titles)):
+            display_pred = plotting.plot_anat(
+                original_nii,
+                axes=axes[1, i],
+                display_mode=mode,
+                cut_coords=center_coords,
+                title=f'Prediction ({title})',
+                cmap='gray' # Background MRI in grayscale
+            )
+            # Add each class as an overlay with specific color
+            for class_idx, color in self.class_colors.items():
+                mask = (predicted_seg == class_idx).astype(np.int16)
+                if np.any(mask): # Only add overlay if the class is present in the mask
+                    display_pred.add_overlay(
+                        nib.Nifti1Image(mask, affine),
+                        cmap=ListedColormap([color]), # Use a single-color colormap
+                        transparency=0.6, # Changed from alpha to transparency
+                        vmin=0.5, # To ensure only 1s are colored
+                        vmax=1.5
+                    )
+            display_pred.annotate(size=10) # Add coordinate annotations
+
+        # Add a single legend for the entire figure at the bottom
+        fig.legend(handles=self.legend_elements, loc='lower center', ncol=3, bbox_to_anchor=(0.5, -0.05))
+        
+        fig_name = os.path.join(patient_viz_dir, f"{patient_id}_3d_views_individual_comparison.png")
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout to make space for suptitle and legend
+        plt.savefig(fig_name, bbox_inches='tight')
+        plt.close(fig)
+        
+        logger.info(f"Saved 3D individual component comparison plot to {fig_name}")
+
+
+    def plot_3d_composite_reconstruction(self, patient_id, original_mri, ground_truth_seg, predicted_seg):
         """
         Generates and saves a comprehensive 3-view nilearn plot for the full 3D volume,
         now focusing on composite tumor regions (ET, TC, WT).
@@ -262,9 +347,9 @@ class Visualizer:
             comp_patch = Patch(facecolor=self.composite_colors[comp_key], edgecolor='k', label=comp_key)
             fig.legend(handles=[comp_patch], loc='lower center', ncol=1, bbox_to_anchor=(0.5, -0.05))
             
-            fig_name = os.path.join(patient_viz_dir, f"{patient_id}_3d_views_comparison_{comp_key}.png")
+            fig_name = os.path.join(patient_viz_dir, f"{patient_id}_3d_views_composite_{comp_key}.png")
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
             plt.savefig(fig_name, bbox_inches='tight')
             plt.close(fig)
             
-            logger.info(f"Saved 3D comparison plot for {comp_key} to {fig_name}")
+            logger.info(f"Saved 3D composite plot for {comp_key} to {fig_name}")

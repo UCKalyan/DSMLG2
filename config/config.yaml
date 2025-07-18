@@ -68,5 +68,8 @@ evaluation_output_path: "./evaluation_results"
 # DSC thresholds for evaluation
 dsc_thresholds: [0, 0.25, 0.50, 0.75, 1]
 
+# Define the best threshold here
+prediction_threshold: 0.50
+
 # ------------------- Logging Configuration -------------------
 log_level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
