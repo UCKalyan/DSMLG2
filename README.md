@@ -278,3 +278,9 @@ This table summarizes the main performance indicators for model across all class
 
 ## Key Takeaway:
 Model achieves its best performance with a Dice Score of 0.708  in Test1 and when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
+
+##
+
+![BraTS20_Training_315 Image](images/BraTS20_Training_315_3d_views_comparison.png)
+
+![BraTS20_Training_310 Image](images/BraTS20_Training_310_3d_views_comparison.png)
