@@ -204,6 +204,7 @@ In summary, if the task involves standard medical imaging with a need for spatia
 | Input Size         | Pros                                         | Cons                                                      | Use Case                |
 |--------------------|----------------------------------------------|-----------------------------------------------------------|-------------------------|
 | 64×64×4            | Efficient, memory-light, fast                | Loses global context, can miss large tumors               | Local features, hardware-limited |
+| 96×96×4            | Better, memory-light, fast                   | Loses global context, can miss large tumors               | Local features, hardware-limited |
 | 128×128×4          | Good context, still manageable size          | Requires more memory, risk of overfitting on small data   | Standard for tumor/cortex |
 | 240×240×4 (full)   | Complete context, best for large lesions     | Very memory-intensive, slow training                      | High-end hardware only  |
 
@@ -247,7 +248,6 @@ This table summarizes the main performance indicators for model across all class
 
 ## Comparison of Test Configurations
 
-|--------------------------|----------------|------------------|--------------------|
 | Parameter/Metric         | Test 1(PiD:315)| Test 2(PiD:310)  | Test 3             |
 |--------------------------|----------------|------------------|--------------------|
 | input_shape              | [64,64,4]      | [96,96,4]        | [128,128,4]        |
@@ -258,24 +258,23 @@ This table summarizes the main performance indicators for model across all class
 | dtype                    | float32        | float32          | float64            |
 | steps_per_epoch          | 100            | 100              | 80                 |
 | validation_steps         | 10             | 10               | 10                 |
-|--------------------------|----------------|------------------|--------------------|
+|                          |                |                  |                    |
 | Loss                     | 0.414          | 0.4623           | 0.38               |
 | Dice Coefficient         | 0.631          | 0.5805           | 0.73               |
 | IoU (Jaccard)            | 0.495          | 0.4384           | 0.61               |
 | Precision                | 0.670          | 0.6924           | 0.78               |
 | Sensitivity (Recall)     | 0.638          | 0.5420           | 0.74               |
 | Specificity              | 0.995          | 0.9955           | 0.97               |
-|--------------------------|----------------|------------------|--------------------|
+|                          |                |                  |                    |
 | dice_coef_et             | 0.000          | 0.6212           | 0.71               |
 | dice_coef_tc             | 0.680          | 0.5789           | 0.76               |
 | dice_coef_wt             | 0.710          | 0.9971           | 0.80               |
-|--------------------------|----------------|------------------|--------------------|
+|                          |                |                  |                    |
 | dice_coef_thresh_0       | 0.013          | 0.0128           | 0.78               |
 | dice_coef_thresh_25      | 0.706          | **0.6688**       | 0.76               |
 | dice_coef_thresh_50      | **0.708**      | 0.6541           | 0.73               |
 | dice_coef_thresh_75      | 0.703          | 0.6306           | 0.71               |
 | dice_coef_thresh_100     | 0.036          | 0.0119           | 0.70               |
-|--------------------------|----------------|------------------|--------------------|
 
 ## Key Takeaway:
 Model achieves its best performance with a Dice Score of 0.708  in Test1 and when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
