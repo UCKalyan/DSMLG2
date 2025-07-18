@@ -3,8 +3,8 @@ import math
 from models.unet2d import UNET2D
 from data.dataset_loader import BratsDataset2D
 from training.metrics import (dice_coef, combined_loss, precision, iou, 
-                              sensitivity, specificity, dice_coef_necrotic, 
-                              dice_coef_edema, dice_coef_enhancing)
+                              sensitivity, specificity, dice_coef_wt, 
+                              dice_coef_tc, dice_coef_et)
 from utils.logger import get_logger
 from utils.helpers import ensure_dir
 import os
@@ -30,8 +30,10 @@ class Trainer2D:
         val_dataset = val_loader.get_dataset(self.config['batch_size'])
 
         if self.config['active_profile'] == 'cpu':
-            steps_per_epoch = self.config['steps_per_epoch']
-            validation_steps = self.config['validation_steps']
+            #steps_per_epoch = self.config['steps_per_epoch']
+            #validation_steps = self.config['validation_steps']
+            steps_per_epoch = math.ceil((train_loader.dataset_size) / self.config['batch_size'])
+            validation_steps = math.ceil((val_loader.dataset_size) / self.config['batch_size'])
         else:
             # Redefine an epoch to be a more reasonable size.
             avg_slices_per_patient = 64
@@ -48,7 +50,7 @@ class Trainer2D:
             loss=combined_loss,
             metrics=[
                 dice_coef, iou, precision, sensitivity, specificity,
-                dice_coef_necrotic, dice_coef_edema, dice_coef_enhancing
+                dice_coef_wt, dice_coef_tc, dice_coef_et
             ]
         )
         
