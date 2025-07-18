@@ -247,10 +247,17 @@ This table summarizes the main performance indicators for model across all class
     This is a crucial part of the analysis. It shows how the Dice Coefficient changes when you adjust the confidence threshold for making a positive prediction.
 
 ### Overall Performance Metrics Classification (benign_vs_malignant)
+    ----- 3D Classification Result -----
     Patient ID: BraTS20_Training_356
     Predicted Score (Malignant Probability): 1.0000
     Predicted Class: Malignant (1)
     Ground Truth Class: Malignant (1)
+
+    Patient ID: BraTS20_Training_300
+    Predicted Score (Malignant Probability): 1.0000
+    Predicted Class: 1 (Malignant)
+    Ground Truth Class: 1 (Malignant)
+
 
 ## Comparison of Test Configurations
 
