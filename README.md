@@ -200,8 +200,35 @@ The best image format for medical imaging among .nii.gz, .npy, and .tfrecord dep
 In summary, if the task involves standard medical imaging with a need for spatial metadata and compatibility with existing tools, .nii.gz is the best choice.
  If the workflow is primarily in Python and metadata is not critical, .npy may be sufficient. For deep learning pipelines using TensorFlow, .tfrecord is advantageous but requires careful handling of metadata separately.
 
+## Understanding the Regions
+The standard evaluation regions are defined as combinations of the base labels:
+### Base Labels
+
+        Necrotic and Non-Enhancing Tumor (Label 1)
+
+        Edema (Label 2)
+
+        Enhancing Tumor (Label 4)
+
+## Composite Regions:
+
+        ET (Enhancing Tumor): This is just Label 4 by itself.
+
+        TC (Tumor Core): This is the combination of Label 1 + Label 4.
+
+        WT (Whole Tumor): This is the combination of all tumor labels: Label 1 + Label 2 + Label 4.
+
 # Overall Performance Metrics for MODEL2D
 This table summarizes the main performance indicators for model across all classes.
+
+    gpu_low_mem:
+    input_shape: [96, 96, 4]
+    volume_shape: [96, 96, 96, 4]
+    batch_size: 8
+    dtype: 'float32' # Use float32 to conserve memory
+    steps_per_epoch: 100
+    validation_steps: 10
+
 
 ### Metric	Value	Interpretation
     Loss	                    0.414	The overall error value the model tried to minimize.
