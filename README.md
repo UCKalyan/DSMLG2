@@ -252,29 +252,29 @@ This table summarizes the main performance indicators for model across all class
 |--------------------------|----------------|------------------|--------------------|
 | input_shape              | [64,64,4]      | [96,96,4]        | [128,128,4]        |
 | volume_shape             | [64,64,4]      | [96,96,96,4]     | [128,128,128,4]    |
-| batch_size               | 8              | 8                | 4                  |
-| epochs                   | 61             | 50               | 100                |
-| Slicing along axis=2     | 65             | 96               | 10                 |
+| batch_size               | 8              | 8                |                    |
+| epochs                   | 61             | 50               |                    |
+| Slicing along axis=2     | 65             | 96               |                    |
 | dtype                    | float32        | float32          | float64            |
-| steps_per_epoch          | 100            | 100              | 80                 |
-| validation_steps         | 10             | 10               | 10                 |
+| steps_per_epoch          | 100            | 100              |                    |
+| validation_steps         | 10             | 10               |                    |
 |                          |                |                  |                    |
-| Loss                     | 0.414          | 0.4623           | 0.38               |
-| Dice Coefficient         | 0.631          | 0.5805           | 0.73               |
-| IoU (Jaccard)            | 0.495          | 0.4384           | 0.61               |
-| Precision                | 0.670          | 0.6924           | 0.78               |
-| Sensitivity (Recall)     | 0.638          | 0.5420           | 0.74               |
-| Specificity              | 0.995          | 0.9955           | 0.97               |
+| Loss                     | 0.414          | 0.4623           |                    |
+| Dice Coefficient         | 0.631          | 0.5805           |                    |
+| IoU (Jaccard)            | 0.495          | 0.4384           |                    |
+| Precision                | 0.670          | 0.6924           |                    |
+| Sensitivity (Recall)     | 0.638          | 0.5420           |                    |
+| Specificity              | 0.995          | 0.9955           |                    |
 |                          |                |                  |                    |
-| dice_coef_et             | 0.000          | 0.6212           | 0.71               |
-| dice_coef_tc             | 0.680          | 0.5789           | 0.76               |
-| dice_coef_wt             | 0.710          | 0.9971           | 0.80               |
+| dice_coef_et             | 0.000          | 0.6212           |                    |
+| dice_coef_tc             | 0.680          | 0.5789           |                    |
+| dice_coef_wt             | 0.710          | 0.9971           |                    |
 |                          |                |                  |                    |
-| dice_coef_thresh_0       | 0.013          | 0.0128           | 0.78               |
-| dice_coef_thresh_25      | 0.706          | **0.6688**       | 0.76               |
-| dice_coef_thresh_50      | **0.708**      | 0.6541           | 0.73               |
-| dice_coef_thresh_75      | 0.703          | 0.6306           | 0.71               |
-| dice_coef_thresh_100     | 0.036          | 0.0119           | 0.70               |
+| dice_coef_thresh_0       | 0.013          | 0.0128           |                    |
+| dice_coef_thresh_25      | 0.706          | **0.6688**       |                    |
+| dice_coef_thresh_50      | **0.708**      | 0.6541           |                    |
+| dice_coef_thresh_75      | 0.703          | 0.6306           |                    |
+| dice_coef_thresh_100     | 0.036          | 0.0119           |                    |
 
 ## Key Takeaway:
 Model achieves its best performance with a Dice Score of 0.708  in Test1 and when the decision threshold is set to 0.50. This is significantly better than the default reported Dice score of 0.631. This result indicates that 0.50 is the optimal threshold to use when deploying this model to generate segmentation masks.
