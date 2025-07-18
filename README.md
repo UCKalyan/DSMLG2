@@ -256,8 +256,8 @@ This table summarizes the main performance indicators for model across all class
 | epochs                   | 61             | 50               |                    |
 | Slicing along axis=2     | 65             | 96               |                    |
 | dtype                    | float32        | float32          | float64            |
-| steps_per_epoch          | 100            | 100              |                    |
-| validation_steps         | 10             | 10               |                    |
+| steps_per_epoch          | 100            | 33               |                    |
+| validation_steps         | 10             | 7                |                    |
 |                          |                |                  |                    |
 | Loss                     | 0.414          | 0.4623           |                    |
 | Dice Coefficient         | 0.631          | 0.5805           |                    |
