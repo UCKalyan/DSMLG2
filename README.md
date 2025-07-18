@@ -227,7 +227,7 @@ The standard evaluation regions are defined as combinations of the base labels:
 
         WT (Whole Tumor): This is the combination of all tumor labels: Label 1 + Label 2 + Label 4.
 
-### Overall Performance Metrics Classification (benign_vs_malignant)
+# Overall Performance Metrics Classification (benign_vs_malignant)
     ----- 3D Classification Result -----
     Patient ID: BraTS20_Training_356
     Predicted Score (Malignant Probability): 1.0000
