@@ -227,25 +227,6 @@ The standard evaluation regions are defined as combinations of the base labels:
 
         WT (Whole Tumor): This is the combination of all tumor labels: Label 1 + Label 2 + Label 4.
 
-# Overall Performance Metrics for processing slices individually with a 2D U-Net and then integrating 3D context
-This table summarizes the main performance indicators for model across all classes.
-
-
-### Metrics
-    Loss	                   The overall error value the model tried to minimize.
-    Dice Coefficient	    	A good measure of overlap between prediction and target.
-    IoU (Jaccard)	            	Another overlap metric, closely related to the Dice score.
-    Precision	            	The model is correct in 67% of its positive predictions.
-    Sensitivity (Recall)	    	The model correctly identifies 63.8% of the actual positive cases.
-    Specificity	            	Excellent. The model is very good at correctly identifying background pixels.
-
-
-### Tumor Sub-Region Performance
-    Model was also evaluated on three specific sub-regions, likely related to brain tumor segmentation (e.g., from the BraTS dataset).
-
-### Dice Score at Different Thresholds: 
-    This is a crucial part of the analysis. It shows how the Dice Coefficient changes when you adjust the confidence threshold for making a positive prediction.
-
 ### Overall Performance Metrics Classification (benign_vs_malignant)
     ----- 3D Classification Result -----
     Patient ID: BraTS20_Training_356
@@ -257,6 +238,18 @@ This table summarizes the main performance indicators for model across all class
     Predicted Score (Malignant Probability): 1.0000
     Predicted Class: 1 (Malignant)
     Ground Truth Class: 1 (Malignant)
+
+# Overall Performance Metrics for processing slices individually with a 2D U-Net and then integrating 3D context
+This table summarizes the main performance indicators for model across all classes.
+
+
+### Metrics
+    Loss	                   The overall error value the model tried to minimize.
+    Dice Coefficient	    	A good measure of overlap between prediction and target.
+    IoU (Jaccard)	            	Another overlap metric, closely related to the Dice score.
+    Precision	            	The model is correct in 67% of its positive predictions.
+    Sensitivity (Recall)	    	The model correctly identifies 63.8% of the actual positive cases.
+    Specificity	            	Excellent. The model is very good at correctly identifying background pixels.
 
 
 ## Comparison of Test Configurations
