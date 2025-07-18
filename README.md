@@ -239,6 +239,15 @@ The standard evaluation regions are defined as combinations of the base labels:
     Predicted Class: 1 (Malignant)
     Ground Truth Class: 1 (Malignant)
 
+    | Metric     | Value |
+    |------------|-------|
+    | Accuracy   | 1.0   |
+    | Precision  | 1.0   |
+    | Recall     | 1.0   |
+    | F1 Score   | 1.0   |
+    | AUC-ROC    |       |
+
+
 # Overall Performance Metrics for processing slices individually with a 2D U-Net and then integrating 3D context
 This table summarizes the main performance indicators for model across all classes.
 
