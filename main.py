@@ -2,6 +2,8 @@ import argparse
 import os
 import yaml
 import numpy as np
+import time
+import datetime
 
 from utils.helpers import load_config, load_npy, ensure_dir
 from utils.logger import get_logger
@@ -133,6 +135,9 @@ def main(args):
             logger.error(f"Evaluation not implemented for model type: {config['model']}")
 
 if __name__ == '__main__':
+    # Start time for overall script
+    overall_start_time = time.time()
+
     parser = argparse.ArgumentParser(description="BraTS 2020 Tumor Analysis Pipeline")
     parser.add_argument('--mode', type=str, required=True,
                         choices=['preprocess', 'convert_to_tfrecord', 'train', 'predict', 'evaluate'],
@@ -147,3 +152,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     main(args)
+    overall_end_time = time.time()
+    total_time = overall_end_time - overall_start_time
+
+    # Format for readability
+    total_time_formatted = str(datetime.timedelta(seconds=int(total_time)))
+    print(f"\nTotal Time taken - completed in {total_time_formatted} (HH:MM:SS)")
