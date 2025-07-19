@@ -126,7 +126,7 @@ data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the
     python main.py --mode predict --model UNET2D --patient_id BraTS20_Training_XXX
     ```
 
-* **Run 3D Segmentation and 3D Reconstruction:** eg:-BraTS20_Training_356
+* **Run 3D Segmentation:** eg:-BraTS20_Training_356
     ```bash
     python main.py --mode predict --model UNET3D --patient_id BraTS20_Training_XXX
     ```
@@ -276,7 +276,7 @@ This table summarizes the main performance indicators for model across all class
 
 ## Comparison of Test Configurations
 
-| Parameter/Metric         | Test 1(PiD:315)| Test 2(PiD:310)  | Test 3             |
+| Parameter/Metric         | Test 1(PiD:315)| Test 2(PiD:215)  | Test 3             |
 |--------------------------|----------------|------------------|--------------------|
 | input_shape              | [64,64,4]      | [96,96,4]        | [128,128,4]        |
 | volume_shape             | [64,64,4]      | [96,96,96,4]     | [128,128,128,4]    |
@@ -311,4 +311,4 @@ Model achieves its best performance with a Dice Score of 0.708  in Test1 and whe
 
 ![BraTS20_Training_315 Image](images/BraTS20_Training_315_3d_views_comparison.png)
 
-![BraTS20_Training_310 Image](images/BraTS20_Training_310_3d_views_comparison.png)
+![BraTS20_Training_215 Image](images/BraTS20_Training_215_3d_views_individual_comparison.png)
