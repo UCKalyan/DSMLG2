@@ -232,6 +232,15 @@ The standard evaluation regions are defined as combinations of the base labels:
 
         WT (Whole Tumor): This is the combination of all tumor labels: Label 1 + Label 2 + Label 4.
 
+In the context of brain tumor segmentation, particularly gliomas, the terms WT (Whole Tumor), TC (Tumor Core), and ET (Enhancing Tumor) refer to distinct sub-regions of the tumor, each with specific characteristics and imaging appearances. These regions are crucial for diagnosis and treatment planning. The necrotic, edema, and enhancing areas are specific components within these sub-regions.
+
+Whole Tumor (WT): This encompasses the entire tumor, including the tumor core and the peritumoral edema. The WT is typically depicted by hyper-intense signals in FLAIR (Fluid Attenuated Inversion Recovery) MRI sequences, indicating the complete extent of the disease.
+Tumor Core (TC): The TC represents the bulk of the tumor, which is usually resected during surgery. It includes the enhancing tumor (ET), as well as the necrotic (NCR) and non-enhancing (NET) parts of the tumor. The appearance of the necrotic and non-enhancing tumor core is typically hypo-intense in T1-Gd (T1-weighted with post-contrast) MRI sequences compared to T1.
+Enhancing Tumor (ET): The ET is characterized by areas that show hyper-intensity in T1Gd MRI sequences when compared to T1, as well as when compared to healthy white matter in T1Gd. This region is indicative of the more aggressive part of the tumor that enhances with contrast.
+Necrotic (NCR): Necrotic regions are fluid-filled areas within the tumor core that appear hypo-intense in T1-Gd MRI sequences. These areas indicate dead or dying tissue within the tumor.
+Edema (ED): Peritumoral edema refers to the swelling around the tumor, which is typically depicted by hyper-intense signals in FLAIR MRI sequences. This region is part of the whole tumor but is outside the tumor core.
+Enhancing Tumor Core: This term specifically refers to the part of the tumor that enhances with contrast in T1Gd MRI sequences, indicating active tumor growth and vascularity.
+
 # Overall Performance Metrics Classification (benign_vs_malignant)
     ----- 3D Classification Result -----
     Patient ID: BraTS20_Training_356
@@ -250,7 +259,6 @@ The standard evaluation regions are defined as combinations of the base labels:
     | Precision  | 1.0   |
     | Recall     | 1.0   |
     | F1 Score   | 1.0   |
-    | AUC-ROC    |       |
 
 
 # Overall Performance Metrics for processing slices individually with a 2D U-Net and then integrating 3D context
@@ -280,8 +288,8 @@ This table summarizes the main performance indicators for model across all class
 | validation_steps         | 10             | 7                |                    |
 |                          |                |                  |                    |
 | Loss                     | 0.414          | 0.4623           |                    |
-| Dice Coefficient         | 0.631          | 0.5805           |                    |
-| IoU (Jaccard)            | 0.495          | 0.4384           |                    |
+| Dice Coefficient         | **0.631**      | 0.5805           |                    |
+| IoU (Jaccard)            | **0.495**      | 0.4384           |                    |
 | Precision                | 0.670          | 0.6924           |                    |
 | Sensitivity (Recall)     | 0.638          | 0.5420           |                    |
 | Specificity              | 0.995          | 0.9955           |                    |
