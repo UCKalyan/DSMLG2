@@ -23,7 +23,7 @@ class Visualizer:
         self.legend_elements = [
             Patch(facecolor='#FF0000', edgecolor='k', label='Necrotic Core (Class 1)'),
             Patch(facecolor='#00FF00', edgecolor='k', label='Edema (Class 2)'),
-            Patch(facecolor='#0000FF', edgecolor='k', label='Enhancing Tumor (Class 3)')
+            Patch(facecolor='#0000FF', edgecolor='k', label='Enhancing Tumor (Class 4)')
         ]
 
         # Define specific colors for 3D plotting to match 2D

@@ -1,8 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Model
+from tensorflow.keras import regularizers
 
 def conv_block(inputs, num_filters):
-    x = layers.Conv2D(num_filters, 3, padding="same")(inputs)
+    x = layers.Conv2D(num_filters, 3, padding="same", kernel_regularizer=regularizers.l2(1e-5))(inputs)
     x = layers.BatchNormalization()(x)
     x = layers.Activation("relu")(x)
     x = layers.Conv2D(num_filters, 3, padding="same")(x)
@@ -13,12 +14,14 @@ def conv_block(inputs, num_filters):
 def encoder_block(inputs, num_filters):
     x = conv_block(inputs, num_filters)
     p = layers.MaxPool2D((2, 2))(x)
+    p = layers.Dropout(0.5)(p) # Add Dropout after the pooling layer
     return x, p
 
 def decoder_block(inputs, skip_features, num_filters):
     x = layers.Conv2DTranspose(num_filters, (2, 2), strides=2, padding="same")(inputs)
     x = layers.Concatenate()([x, skip_features])
     x = conv_block(x, num_filters)
+    #x = layers.Dropout(0.3)(x)
     return x
 
 class UNET2D:
@@ -39,6 +42,7 @@ class UNET2D:
 
         # Bridge
         b1 = conv_block(p4, 1024)
+        b1 = layers.Dropout(0.5)(b1)
 
         # Decoder
         d1 = decoder_block(b1, s4, 512)

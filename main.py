@@ -18,6 +18,9 @@ from inference.predictor_3d_cls import Predictor3DClassifier
 from inference.reconstruct3d import Reconstructor3D
 from inference.visualizer import Visualizer
 from evaluation.evaluator import Evaluator
+# NEW: Import EnsemblePredictor (if you decide to use it separately in main, but evaluator will handle it)
+# from ensemble_predictor import EnsemblePredictor # Only if you call it directly here
+
 
 logger = get_logger("BraTS_Unet_Project")
 
@@ -37,7 +40,12 @@ def load_and_prepare_config(args):
         config['model'] = args.model
     if args.output_type:
         config['output_type'] = args.output_type
-    
+    # Set model_type in config based on chosen model for EnsemblePredictor
+    if config['model'] == 'UNET2D':
+        config['model_type'] = '2d'
+    elif config['model'] == 'UNET3D':
+        config['model_type'] = '3d'
+    # No 'model_type' for Classifier as ensemble evaluation is for segmentation
     return config
 
 def main(args):
@@ -158,6 +166,19 @@ def main(args):
         else:
             logger.warning(f"Prediction for {config['model']} is not fully implemented in this script.")
 
+    # NEW: Mode to run prediction on the entire dataset and save to CSV
+    elif args.mode == 'predict_dataset':
+        logger.info(f"----- Running Dataset Prediction for model: {config['model']} -----")
+        if config['model'] != 'CLASSIFIER3D':
+            logger.error(f"Dataset prediction mode is only implemented for CLASSIFIER3D, but model is {config['model']}.")
+            return
+        
+        # Instantiate the predictor
+        predictor = Predictor3DClassifier(config, model_path='classifier3d_best.keras')
+
+        # Run prediction on the test dataset and generate the report and CSV file.
+        # To run on the validation set, change the argument to dataset_mode='validation'
+        predictor.predict_dataset(dataset_mode='test')
 
     elif args.mode == 'evaluate':
         logger.info(f"----- Running Evaluation for model: {config['model']} -----")
@@ -171,13 +192,34 @@ def main(args):
         else:
             logger.error(f"Evaluation not implemented for model type: {config['model']}")
 
+        # --- NEW ENSEMBLE EVALUATION MODE ---
+    elif args.mode == 'ensemble_evaluate':
+        logger.info(f"----- Running Ensemble Evaluation -----")
+        evaluator = Evaluator(config)
+        
+        # Determine which set of model paths to use based on the 'model' config
+        if config['model'] == 'UNET2D':
+            ensemble_model_paths = config.get('ensemble_model_paths_2d', [])
+        elif config['model'] == 'UNET3D':
+            ensemble_model_paths = config.get('ensemble_model_paths_3d', [])
+        else:
+            raise ValueError(f"Ensemble evaluation is only supported for UNET2D or UNET3D models. Configured model: {config['model']}")
+
+        if not ensemble_model_paths:
+            logger.error(f"No ensemble model paths defined in config for model type: {config['model']}")
+            return
+
+        evaluator.evaluate_ensemble(ensemble_model_paths)
+    else:
+        logger.error(f"Unknown mode: {args.mode}")
+
 if __name__ == '__main__':
     # Start time for overall script
     overall_start_time = time.time()
 
     parser = argparse.ArgumentParser(description="BraTS 2020 Tumor Analysis Pipeline")
     parser.add_argument('--mode', type=str, required=True,
-                        choices=['preprocess', 'convert_to_tfrecord', 'train', 'predict', 'evaluate'],
+                        choices=['preprocess', 'convert_to_tfrecord', 'train', 'predict', 'evaluate', 'predict_dataset', 'ensemble_evaluate'],
                         help="Pipeline mode to run.")
     parser.add_argument('--model', type=str,
                         help="Specify which model to use (overrides config). E.g., UNET2D, Classifier3D")

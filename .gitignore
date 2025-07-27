@@ -36,9 +36,15 @@
 
 #folders
 **/processed_data/
+**/processed_data_64/
+**/processed_data_96/
 **/__pycache__/
 **/logs/
+**/logs_64/
+**/logs_96/
 processed_data/** 
+processed_data_64/** 
+processed_data_96/** 
 logs/**
 
 #models

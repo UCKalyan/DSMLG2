@@ -1,0 +1,12 @@
+Classification Report for 'test' Dataset
+==================================================
+Overall Accuracy: 1.0000
+
+              precision    recall  f1-score   support
+
+      Benign       0.00      0.00      0.00         0
+   Malignant       1.00      1.00      1.00        56
+
+    accuracy                           1.00        56
+   macro avg       0.50      0.50      0.50        56
+weighted avg       1.00      1.00      1.00        56

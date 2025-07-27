@@ -6,10 +6,13 @@ class Augmenter:
     Applies real-time data augmentation.
     Handles both 2D slices (rank 3) and 3D volumes (rank 4).
     """
-    def __init__(self, flip=True, rotate=True, intensity_shift=True):
+    def __init__(self, flip=True, rotate=True, intensity_shift=True,
+                 gaussian_noise=True, gamma_correction=True): # New parameters
         self.flip = flip
         self.rotate = rotate
         self.intensity_shift = intensity_shift
+        self.gaussian_noise = gaussian_noise         # New
+        self.gamma_correction = gamma_correction   # New
 
     @tf.function
     def augment(self, volume, label):
@@ -24,6 +27,20 @@ class Augmenter:
             shift = tf.random.uniform((), -0.1, 0.1)
             scale = tf.random.uniform((), 0.9, 1.1)
             volume = (volume + shift) * scale
+
+        # --- NEW: Gaussian Noise ---
+        # Adds random noise to the image, making the model more robust.
+        if self.gaussian_noise and tf.random.uniform(()) > 0.5:
+            noise = tf.random.normal(shape=tf.shape(volume), mean=0.0, stddev=0.05, dtype=tf.float32)
+            volume = volume + noise
+
+        # --- NEW: Gamma Correction ---
+        # Adjusts the contrast of the image.
+        if self.gamma_correction and tf.random.uniform(()) > 0.5:
+            gamma = tf.random.uniform((), minval=0.7, maxval=1.5)
+            # Ensure volume is clipped to prevent issues with negative values if any
+            volume_clipped = tf.clip_by_value(volume, 0.0, 1.0)
+            volume = tf.pow(volume_clipped, gamma)
 
         # --- Flipping ---
         if self.flip:
@@ -67,5 +84,7 @@ def get_augmenter(config):
     return Augmenter(
         flip=aug_config.get('flip', True),
         rotate=aug_config.get('rotate', True),
-        intensity_shift=aug_config.get('intensity_shift', True)
+        intensity_shift=aug_config.get('intensity_shift', True),
+        gaussian_noise=aug_config.get('gaussian_noise', True),      # New
+        gamma_correction=aug_config.get('gamma_correction', True)   # New
     )

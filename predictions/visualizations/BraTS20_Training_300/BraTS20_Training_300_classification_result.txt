@@ -1,4 +1,0 @@
-Patient ID: BraTS20_Training_300
-Predicted Score (Malignant Probability): 1.0000
-Predicted Class: Malignant (1)
-Ground Truth Class: Malignant (1)

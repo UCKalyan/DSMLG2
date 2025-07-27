@@ -59,22 +59,35 @@ class BratsDataset3D:
             return volume, seg_cat
 
     def get_dataset(self, batch_size):
-        dataset = tf.data.TFRecordDataset(self.filepath, num_parallel_reads=tf.data.AUTOTUNE)
-        
-        if self.mode == 'train':
-            dataset = dataset.shuffle(buffer_size=100) # Shuffle records
+            dataset = tf.data.TFRecordDataset(self.filepath, num_parallel_reads=tf.data.AUTOTUNE)
+            
+            if self.mode == 'train':
+                dataset = dataset.shuffle(buffer_size=100)
 
-        dataset = dataset.map(self._parse_tfrecord_fn, num_parallel_calls=tf.data.AUTOTUNE)
+            dataset = dataset.map(self._parse_tfrecord_fn, num_parallel_calls=tf.data.AUTOTUNE)
 
-        if self.mode == 'train' and self.augmenter:
-            dataset = dataset.map(self.augmenter.augment, num_parallel_calls=tf.data.AUTOTUNE)
-        
-        if self.mode != 'test':
-             dataset = dataset.repeat()
+            if self.mode == 'train' and self.augmenter:
+                dataset = dataset.map(self.augmenter.augment, num_parallel_calls=tf.data.AUTOTUNE)
+            
+            # --- ADD THE FIX HERE ---
+            # Enforce the shape after augmentation to fix rotation inconsistencies
+            if self.config['output_type'] != 'benign_vs_malignant':
+                def enforce_shape(volume, segmentation):
+                    vol_shape = self.config['volume_shape']
+                    seg_shape = (*vol_shape[:-1], self.config['num_classes'])
+                    volume = tf.reshape(volume, vol_shape)
+                    segmentation = tf.reshape(segmentation, seg_shape)
+                    return volume, segmentation
 
-        dataset = dataset.batch(batch_size)
-        dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
-        return dataset
+                dataset = dataset.map(enforce_shape, num_parallel_calls=tf.data.AUTOTUNE)
+            # ------------------------
+
+            if self.mode != 'test':
+                dataset = dataset.repeat()
+
+            dataset = dataset.batch(batch_size)
+            dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+            return dataset
 
 class BratsDataset2D:
     """

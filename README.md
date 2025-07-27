@@ -148,13 +148,23 @@ data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the
     ```bash
     python main.py --mode evaluate --model CLASSIFIER3D
     ```
+### Ensemble Evaluation
+
+* **Ensemble Evaluate a trained UNET2D models:**
+    ```bash
+    python main.py --mode ensemble_evaluate --model UNET2D
+    ```
+* **Ensemble Evaluate a trained UNET3D models:**
+    ```bash
+    python main.py --mode ensemble_evaluate --model UNET3D
+    ```
 
 ## Configuration
 
 All parameters can be modified in `config/config.yaml`:
 
 * `model`: Choose between `UNET2D`, `UNET3D`, `Classifier3D`.
-* `encoder`: Encoder backbone for UNET models (e.g., `ResNet34`).
+* `encoder`: Encoder backbone for UNET models (e.g., `Default UNet`).
 * `input_shape`: Input shape for the models.
 * `loss_function`: Loss function for training.
 * `batch_size`, `epochs`: Training parameters.

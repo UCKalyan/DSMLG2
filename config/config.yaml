@@ -1,22 +1,28 @@
 # ------------------- Profile Configuration -------------------
 # Use 'gpu_high_mem' for high-end GPUs, 'gpu_low_mem' for cards with less VRAM,
 # and 'cpu' for running without a dedicated GPU.
-active_profile: cpu #gpu_high_mem
+active_profile: gpu_low_mem #gpu_high_mem
 
 # ------------------- Hardware Profiles -------------------
 gpu_high_mem:
   input_shape: [128, 128, 4]
   volume_shape: [128, 128, 128, 4]
   batch_size: 16
-  encoder: ResNet34
+  encoder: default
   dtype: 'float64' # Use float64 for high precision on powerful hardware
 
 gpu_low_mem:
-  input_shape: [96, 96, 4]
-  volume_shape: [96, 96, 96, 4]
-  batch_size: 8
+  input_shape: [128, 128, 4]
+  volume_shape: [128, 128, 128, 4]
+  batch_size: 4
   encoder: "default"
   dtype: 'float32' # Use float32 to conserve memory
+  steps_per_epoch: 100
+  validation_steps: 20
+  steps_per_epoch_3d: 100
+  validation_steps_3d: 20
+  steps_per_epoch_classification: 50
+  validation_steps_classification: 10
 
 cpu:
   input_shape: [64, 64, 4]
@@ -40,11 +46,20 @@ output_type: segmentation # benign_vs_malignant or segmentation
 # We use 4 classes to include the background (0)
 num_classes: 4
 num_classification_classes: 2 # Example: 2 for binary classification (tumor/no-tumor)
+voxel_spacing: [1.0, 1.0, 1.0] # Adjusted  values based on dataset's actual voxel dimensions (z, y, x)
+class_weights: [0.001, 1.5, 1.3, 1.2] #[0.001313737587211242, 1.4864923264981404, 1.2893313266329514, 1.222862609281697]
+
+# New Learning Rate Scheduler parameters
+lr_plateau_monitor: 'val_loss' # Metric to monitor for LR reduction
+lr_plateau_factor: 0.5           # Factor by which the learning rate will be reduced
+lr_plateau_patience: 10           # Number of epochs with no improvement after which learning rate will be reduced
+lr_plateau_min_lr: 0.00005       # Lower bound on the learning rate
+lr_plateau_mode: 'min'           # In 'max' mode, the learning rate will be reduced when the quantity monitored has stopped increasing
 
 # ------------------- Training Configuration -------------------
-loss_function: "Dice + CrossEntropy"
-epochs: 2 #100
-learning_rate: 0.001
+loss_function: "create_w_t_e_loss"
+epochs: 100 #100
+learning_rate: 0.0001
 early_stopping_patience: 15
 
 # ------------------- Data Configuration -------------------
@@ -69,7 +84,18 @@ evaluation_output_path: "./evaluation_results"
 dsc_thresholds: [0, 0.25, 0.50, 0.75, 1]
 
 # Define the best threshold here
-prediction_threshold: 0.50
+prediction_threshold: 0.25
 
 # ------------------- Logging Configuration -------------------
 log_level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# ------------------- Ensemble Configuration -------------------
+ensemble_model_paths_2d:
+  - 'unet2d_best_better1.keras'
+  - 'unet2d_best.keras'
+  - 'unet2d_best64.keras'
+  - 'unet2d_best962.keras'
+ensemble_model_paths_3d:
+  - 'unet3d_seg_best_model_1.keras'
+  - 'unet3d_seg_best_model_2.keras'
+  - 'unet3d_seg_best_model_3.keras'

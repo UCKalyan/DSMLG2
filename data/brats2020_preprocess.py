@@ -40,7 +40,7 @@ class Preprocessor:
         image_array[mask_array == 0] = 0
         return sitk.GetImageFromArray(image_array)
 
-    def _normalize(self, volume_data):
+    def _normalize_old(self, volume_data):
         """
         Applies z-score normalization to the volume.
         """
@@ -51,6 +51,36 @@ class Preprocessor:
         normalized_flat = scaler.fit_transform(flat_data)
         # Reshape back to original
         return normalized_flat.reshape(volume_data.shape)
+    
+    def _normalize(self, volume_data):
+        """
+        Applies z-score normalization to each modality channel independently,
+        using only the non-zero (foreground) voxels for statistics.
+        """
+        normalized_volume = np.zeros_like(volume_data, dtype=self.dtype)
+        
+        # Iterate over each of the 4 channels (t1, t1ce, t2, flair)
+        for i in range(volume_data.shape[-1]):
+            # Select one modality channel
+            modality_slice = volume_data[..., i]
+            
+            # Create a mask for the non-zero foreground voxels
+            foreground_mask = modality_slice > 0
+            
+            # If there are no foreground voxels, leave the slice as zeros
+            if np.any(foreground_mask):
+                # Calculate mean and std dev from foreground voxels only
+                mean = np.mean(modality_slice[foreground_mask])
+                std = np.std(modality_slice[foreground_mask])
+                
+                # Avoid division by zero if std is 0
+                if std > 0:
+                    # Normalize the foreground voxels
+                    normalized_slice = (modality_slice - mean) / std
+                    # Apply the normalized values back to the output volume
+                    normalized_volume[..., i][foreground_mask] = normalized_slice[foreground_mask]
+        
+        return normalized_volume
 
 
     def _resample(self, volume, original_shape, is_mask=False):

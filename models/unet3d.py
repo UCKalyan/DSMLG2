@@ -12,7 +12,8 @@ def conv_block_3d(inputs, num_filters):
 
 def encoder_block_3d(inputs, num_filters):
     x = conv_block_3d(inputs, num_filters)
-    p = layers.MaxPool3D((2, 2, 2))(x)
+    x_reg = layers.Dropout(0.3)(x)
+    p = layers.MaxPool3D((2, 2, 2), dtype='float32')(x_reg)
     return x, p
 
 def decoder_block_3d(inputs, skip_features, num_filters):
