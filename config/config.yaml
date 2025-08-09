@@ -9,12 +9,12 @@ gpu_high_mem:
   volume_shape: [128, 128, 128, 4]
   batch_size: 16
   encoder: default
-  dtype: 'float64' # Use float64 for high precision on powerful hardware
+  dtype: 'float32' # Use float64 for high precision on powerful hardware
 
 gpu_low_mem:
-  input_shape: [128, 128, 4]
-  volume_shape: [128, 128, 128, 4]
-  batch_size: 4
+  input_shape: [224, 224, 4]
+  volume_shape: [224, 224, 224, 4]
+  batch_size: 16
   encoder: "default"
   dtype: 'float32' # Use float32 to conserve memory
   steps_per_epoch: 100
@@ -47,35 +47,37 @@ output_type: segmentation # benign_vs_malignant or segmentation
 num_classes: 4
 num_classification_classes: 2 # Example: 2 for binary classification (tumor/no-tumor)
 voxel_spacing: [1.0, 1.0, 1.0] # Adjusted  values based on dataset's actual voxel dimensions (z, y, x)
-class_weights: [0.001, 1.5, 1.3, 1.2] #[0.001313737587211242, 1.4864923264981404, 1.2893313266329514, 1.222862609281697]
+class_weights: [0.0013, 0.01456, 0.01289, 0.045222] #[0.001313737587211242, 1.4864923264981404, 1.2893313266329514, 1.222862609281697]
 
 # New Learning Rate Scheduler parameters
-lr_plateau_monitor: 'val_loss' # Metric to monitor for LR reduction
+lr_plateau_monitor: 'val_dice_coef_wt' # Metric to monitor for LR reduction , val_loss , val_dice_coef_wt
 lr_plateau_factor: 0.5           # Factor by which the learning rate will be reduced
 lr_plateau_patience: 10           # Number of epochs with no improvement after which learning rate will be reduced
-lr_plateau_min_lr: 0.00005       # Lower bound on the learning rate
-lr_plateau_mode: 'min'           # In 'max' mode, the learning rate will be reduced when the quantity monitored has stopped increasing
+lr_plateau_min_lr: 0.00006       # Lower bound on the learning rate
+lr_plateau_mode: 'max'           # In 'max' mode, the learning rate will be reduced when the quantity monitored has stopped increasing
 
 # ------------------- Training Configuration -------------------
 loss_function: "create_w_t_e_loss"
-epochs: 100 #100
+epochs: 500 #100
 learning_rate: 0.0001
 early_stopping_patience: 15
 
 # ------------------- Data Configuration -------------------
-#data_path: "D://PES Mtech//Sem-3//Project//archive//BraTS2020_TrainingData//MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
-data_path: "/Users/kalyan/Documents/Software/segmentation-project/data/processed/BraTS2020_Train_Test/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the main BraTS2020 dataset folder
-
+data_path: "BraTS2020_Train_Test/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData"
 # Path to the main BraTS2020 dataset folder
 processed_data_path: "./processed_data"
 train_val_test_split: [0.7, 0.15, 0.15] # Split for patient IDs
-slice_axis: 'z' # Axis for 2D slicing ('x', 'y', or 'z')
+slice_axis: 'x' # Axis for 2D slicing ('x', 'y', or 'z')
+slice_axis_model : 'unet2d_x_axis_best_stage1.keras'
 
 # ------------------- Augmentation Configuration -------------------
 augmentations:
   flip: true
   rotate: true
   intensity_shift: true
+  # --- ADD THESE TWO LINES ---
+  gaussian_noise: true
+  gamma_correction: true
 
 # ------------------- Inference & Evaluation Configuration -------------------
 prediction_output_path: "./predictions"
@@ -91,10 +93,9 @@ log_level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 # ------------------- Ensemble Configuration -------------------
 ensemble_model_paths_2d:
-  - 'unet2d_best_better1.keras'
-  - 'unet2d_best.keras'
-  - 'unet2d_best64.keras'
-  - 'unet2d_best962.keras'
+  #- 'unet2d_z_axis_best.keras'
+  - 'unet2d_y_axis_best.keras'
+  - 'unet2d_x_axis_best.keras'
 ensemble_model_paths_3d:
   - 'unet3d_seg_best_model_1.keras'
   - 'unet3d_seg_best_model_2.keras'

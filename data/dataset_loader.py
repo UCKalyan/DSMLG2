@@ -42,8 +42,11 @@ class BratsDataset3D:
             print('Using uint8')
             segmentation = tf.io.parse_tensor(example['segmentation'], out_type=tf.uint8)
         # ----------------------
+        if self.config['dtype'] == 'float32':
+            label = tf.io.parse_tensor(example['label'], out_type=tf.float32)
+        else:
+            label = tf.io.parse_tensor(example['label'], out_type=tf.float64)
 
-        label = tf.io.parse_tensor(example['label'], out_type=tf.float32)
 
         # Set shape explicitly. This is crucial for model building.
         vol_shape = self.config['volume_shape']

@@ -1,15 +1,16 @@
 import tensorflow as tf
+import numpy as np
 import math
 from models.unet2d import UNET2D
 from data.dataset_loader import BratsDataset2D
 from training.metrics import (get_custom_objects, dice_coef,  precision, iou, 
                               sensitivity, specificity, dice_coef_wt, create_w_t_e_loss,
-                              dice_coef_tc, dice_coef_et,combined_weighted_loss, create_dice_focal_loss,create_weighted_categorical_crossentropy)
+                              dice_coef_tc, dice_coef_et,combined_weighted_loss, create_dice_focal_loss,create_weighted_categorical_crossentropy,wasserstein_dice_loss_fn)
 from utils.logger import get_logger
 from utils.helpers import ensure_dir
 import os
 import matplotlib.pyplot as plt
-# Import the ReduceLROnPlateau callback
+from training.losses import DiceCELoss, dice_coefficient
 from tensorflow.keras.callbacks import ReduceLROnPlateau #
 from tensorflow.keras.optimizers.schedules import CosineDecayRestarts
 
@@ -38,13 +39,27 @@ class Trainer2D:
         steps_per_epoch = math.ceil(train_loader.dataset_size / self.config['batch_size'])
         validation_steps = math.ceil(val_loader.dataset_size / self.config['batch_size'])
 
+
+
+        distance_matrix = np.array([
+            [0, 1, 1, 1],
+            [1, 0, 1, 1],
+            [1, 1, 0, 1],
+            [1, 1, 1, 0],
+        ], dtype=np.float32)
+        distance_matrix_tf = tf.constant(distance_matrix)
         # --- FIX: Use the correct weighted loss function ---
         class_weights = self.config['class_weights'] # For BG, NCR/NET, ED, ET
-        #loss_function = create_dice_focal_loss(class_weights,loss_factor=0.5)
+        #loss_function = create_dice_focal_loss(class_weights,loss_factor=0.3)
         #loss_function = create_weighted_categorical_crossentropy(class_weights)
         #loss_function = create_weighted_categorical_crossentropy(class_weights)
-        loss_function = create_w_t_e_loss(class_weights,wt_w=0.4, tc_w=0.3, et_w=0.3)
+        #loss_function = create_w_t_e_loss(class_weights, wt_w=0.0002, tc_w=0.0003, et_w=0.0028)
+        #loss_function = create_w_t_e_loss(class_weights, wt_w=0.3, tc_w=0.3, et_w=0.4)
+        #loss_function = lambda y_true, y_pred: generalized_wasserstein_dice_loss(y_true, y_pred, distance_matrix_tf)
+        loss_function = wasserstein_dice_loss_fn(distance_matrix_tf)
+        #loss_function = generalized_wasserstein_dice_loss(class_weights, wt_w=0.33, tc_w=0.33, et_w=0.34)
         #loss_function = combined_weighted_loss(class_weights)
+        #loss_function = DiceCELoss(dice_weight=1.95, ce_weight=1.96)
 
         # ---------------------------------------------------
 
@@ -65,18 +80,18 @@ class Trainer2D:
         #     verbose=1
         # )
         lr_scheduler = ReduceLROnPlateau(
-            monitor=self.config['lr_plateau_monitor'], # CHANGE THIS from 'val_loss'
-            factor=self.config['lr_plateau_factor'],    # Read from config
-            patience=self.config['lr_plateau_patience'], # Read from config
-            min_lr=self.config['lr_plateau_min_lr'],   # Read from config
-            mode='max',       # Read from config
+            monitor=self.config['lr_plateau_monitor'],
+            factor=self.config['lr_plateau_factor'],
+            patience=self.config['lr_plateau_patience'],
+            min_lr=self.config['lr_plateau_min_lr'],
+            mode=self.config['lr_plateau_mode'], # This will be 'max'
             verbose=1
         )
         
 
                 # Load the best model from Stage 1
         # self.model = tf.keras.models.load_model(
-        #     'unet2d_stage1_best.keras', 
+        #     self.config['slice_axis_model'], 
         #     custom_objects=get_custom_objects() # Assumes get_custom_objects is in metrics.py
         # )
 
@@ -103,7 +118,10 @@ class Trainer2D:
             ]
         )
         
-
+        slice_axis = self.config.get('slice_axis', 'z')
+        logger.info(f"slice_axis { slice_axis}" )
+        best_model_filename = f'unet2d_{slice_axis}_axis_best.keras'
+        logger.info(f"Models will be saved to '{best_model_filename}'")
 
 
         # Training History Visualization Callback
@@ -138,19 +156,33 @@ class Trainer2D:
             #     mode='max',
             #     restore_best_weights=True
             # ),  
+            # tf.keras.callbacks.ModelCheckpoint(
+            #     best_model_filename, 
+            #     save_best_only=True, 
+            #     monitor=self.config['lr_plateau_monitor'], 
+            #     mode='max' # Change this
+            # ),
+            # tf.keras.callbacks.EarlyStopping(
+            #     monitor=self.config['lr_plateau_monitor'], 
+            #     patience=self.config['early_stopping_patience'], # Use value from config
+            #     verbose=1, 
+            #     mode='max', # Change this
+            #     restore_best_weights=True
+            # ),
             tf.keras.callbacks.ModelCheckpoint(
-                'unet2d_best.keras', 
-                save_best_only=True, 
-                monitor=self.config['lr_plateau_monitor'], 
-                mode='min' # Change this
+                best_model_filename,
+                save_best_only=True,
+                monitor=self.config['lr_plateau_monitor'], # Now monitors val_dice_coef_wt
+                mode=self.config['lr_plateau_mode'] # Now uses 'max'
             ),
             tf.keras.callbacks.EarlyStopping(
-                monitor=self.config['lr_plateau_monitor'], 
-                patience=self.config['early_stopping_patience'], # Use value from config
-                verbose=1, 
-                mode='min', # Change this
+                monitor=self.config['lr_plateau_monitor'], # Now monitors val_dice_coef_wt
+                patience=self.config['early_stopping_patience'],
+                verbose=1,
+                mode=self.config['lr_plateau_mode'], # Now uses 'max'
                 restore_best_weights=True
             ),
+
             tf.keras.callbacks.TensorBoard(log_dir='logs/unet2d'),
             history_plot_callback,
             lr_scheduler

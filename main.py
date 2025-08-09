@@ -210,6 +210,45 @@ def main(args):
             return
 
         evaluator.evaluate_ensemble(ensemble_model_paths)
+    elif args.mode == 'ensemble_predict':
+        logger.info(f"----- Running Ensemble Prediction and Visualization -----")
+        if not args.patient_id:
+            raise ValueError("Patient ID must be provided for ensemble prediction mode.")
+
+        patient_data_path = os.path.join(config['processed_data_path'], args.patient_id)
+        if not os.path.exists(patient_data_path):
+             raise FileNotFoundError(f"Processed data for patient {args.patient_id} not found.")
+
+        # Load the necessary data
+        volume = load_npy(os.path.join(patient_data_path, 'volume.npy'))
+        ground_truth_seg = load_npy(os.path.join(patient_data_path, 'segmentation.npy'))
+        
+        # Determine which set of model paths to use
+        if config['model'] == 'UNET2D':
+            ensemble_model_paths = config.get('ensemble_model_paths_2d', [])
+        elif config['model'] == 'UNET3D':
+            ensemble_model_paths = config.get('ensemble_model_paths_3d', [])
+        else:
+            raise ValueError(f"Ensemble prediction is only supported for UNET2D or UNET3D models. Configured model: {config['model']}")
+
+        if not ensemble_model_paths:
+            logger.error(f"No ensemble model paths defined in config for model type: {config['model']}")
+            return
+
+        # Instantiate the EnsemblePredictor and get the final 3D mask
+        from inference.ensemble_predictor import EnsemblePredictor # Import locally
+        ensemble_predictor = EnsemblePredictor(config, ensemble_model_paths)
+        ensemble_prediction_mask = ensemble_predictor.predict_volume(volume)
+
+        # Instantiate the Visualizer
+        visualizer = Visualizer(config)
+        flair_volume = volume[..., 3] # Use FLAIR for background visualization
+
+        # Generate and save the 3D plots
+        logger.info("Generating 3D visualizations for individual components and composite regions...")
+        visualizer.plot_3d_individual_reconstruction(args.patient_id, flair_volume, ground_truth_seg, ensemble_prediction_mask)
+        visualizer.plot_3d_composite_reconstruction(args.patient_id, flair_volume, ground_truth_seg, ensemble_prediction_mask)
+        logger.info(f"Ensemble visualizations for patient {args.patient_id} saved to {visualizer.output_path}")
     else:
         logger.error(f"Unknown mode: {args.mode}")
 
@@ -219,7 +258,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="BraTS 2020 Tumor Analysis Pipeline")
     parser.add_argument('--mode', type=str, required=True,
-                        choices=['preprocess', 'convert_to_tfrecord', 'train', 'predict', 'evaluate', 'predict_dataset', 'ensemble_evaluate'],
+                        choices=['preprocess', 'convert_to_tfrecord', 'train', 'predict', 'evaluate', 'predict_dataset', 'ensemble_evaluate', 'ensemble_predict'],
                         help="Pipeline mode to run.")
     parser.add_argument('--model', type=str,
                         help="Specify which model to use (overrides config). E.g., UNET2D, Classifier3D")

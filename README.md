@@ -1,4 +1,4 @@
-# 3D UNET Project for BraTS 2020 Brain Tumor Analysis
+# 2D/3D UNET Project for BraTS 2020 Brain Tumor Analysis
 
 This project provides a complete pipeline for brain tumor analysis on the BraTS 2020 dataset, including 3D classification of tumors as benign or malignant, and 2D/3D segmentation of tumor sub-regions.
 
@@ -119,21 +119,7 @@ data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the
     python main.py --mode train --model UNET3D
     ```
 
-### Inference
 
-* **Run 2D Segmentation and 3D Reconstruction:** eg:- BraTS20_Training_356
-    ```bash
-    python main.py --mode predict --model UNET2D --patient_id BraTS20_Training_XXX
-    ```
-
-* **Run 3D Segmentation:** eg:-BraTS20_Training_356
-    ```bash
-    python main.py --mode predict --model UNET3D --patient_id BraTS20_Training_XXX
-    ```
-* **Run 3D Classification :** eg:-BraTS20_Training_356
-    ```bash
-    python main.py --mode predict --model CLASSIFIER3D --patient_id BraTS20_Training_XXX
-    ```
 ### Evaluation
 
 * **Evaluate a trained UNET2D model:**
@@ -148,7 +134,7 @@ data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the
     ```bash
     python main.py --mode evaluate --model CLASSIFIER3D
     ```
-### Ensemble Evaluation
+### Ensemble Evaluation With multiple models
 
 * **Ensemble Evaluate a trained UNET2D models:**
     ```bash
@@ -157,6 +143,27 @@ data_path: "/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData" # Path to the
 * **Ensemble Evaluate a trained UNET3D models:**
     ```bash
     python main.py --mode ensemble_evaluate --model UNET3D
+    ```
+
+### Inference / Prediction
+
+* **Run 2D Segmentation and 3D Reconstruction:** eg:- BraTS20_Training_356
+    ```bash
+    python main.py --mode predict --model UNET2D --patient_id BraTS20_Training_
+    ```
+
+* **Run Ensemble 2D Segmentation and 3D Reconstruction:** eg:- BraTS20_Training_356
+    ```bash
+    python main.py --mode ensemble_predict --model UNET2D --patient_id BraTS20_Training_
+    ```
+
+* **Run 3D Segmentation:** eg:-BraTS20_Training_356
+    ```bash
+    python main.py --mode predict --model UNET3D --patient_id BraTS20_Training_
+    ```
+* **Run 3D Classification :** eg:-BraTS20_Training_356
+    ```bash
+    python main.py --mode predict --model CLASSIFIER3D --patient_id BraTS20_Training_
     ```
 
 ## Configuration

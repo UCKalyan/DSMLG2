@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 import numpy as np
 from medpy.metric.binary import hd95
-
+from training.losses import DiceCELoss, dice_coefficient
 
 # =============================================================================
 # CORE METRIC FUNCTIONS (NUMERICALLY STABLE & MIXED-PRECISION SAFE)
@@ -158,7 +158,12 @@ def get_custom_objects():
         "dice_coef_wt": dice_coef_wt,
         "dice_coef_tc": dice_coef_tc,
         "dice_coef_et": dice_coef_et,
-        "loss": create_w_t_e_loss
+        "loss": create_w_t_e_loss,
+        # --- ADD THESE TWO LINES ---
+        "DiceCELoss": DiceCELoss,
+        "dice_coefficient": dice_coefficient, # It's good practice to include metrics too
+        # ---------------------------
+        "generalized_wasserstein_dice_loss":generalized_wasserstein_dice_loss
 
     }
 
@@ -329,7 +334,7 @@ def create_w_t_e_loss1(class_weights, wt_w=0.33, tc_w=0.33, et_w=0.33):
     return loss
 
 # In metrics.py, modify this function
-def create_w_t_e_loss(class_weights, wt_w=0.25, tc_w=0.25, et_w=0.5): # Note the new default weights
+def create_w_t_e_loss(class_weights,  wt_w=0.2, tc_w=0.4, et_w=0.4): # Note the new default weights
     """
     Creates a loss function that is a weighted sum of Dice losses
     for Whole Tumor (WT), Tumor Core (TC), and Enhancing Tumor (ET).
@@ -345,3 +350,49 @@ def create_w_t_e_loss(class_weights, wt_w=0.25, tc_w=0.25, et_w=0.5): # Note the
         return loss_wt + loss_tc + loss_et
 
     return loss
+
+
+
+def wasserstein_dice_loss_fn(distance_matrix):
+    def loss(y_true, y_pred):
+        return generalized_wasserstein_dice_loss(y_true, y_pred, distance_matrix)
+    return loss
+
+def generalized_wasserstein_dice_loss(y_true, y_pred, distance_matrix, smooth=1e-6):
+    """
+    Computes the Generalized Wasserstein Dice Loss for multi-class segmentation.
+
+    Args:
+        y_true: Ground truth one-hot mask, shape (..., num_classes).
+        y_pred: Model logits or softmax probabilities, shape (..., num_classes).
+        distance_matrix: 2D numpy or tensor array [num_classes, num_classes] with non-negative distances (costs).
+        smooth: Smoothing factor to avoid divide by zero.
+
+    Returns:
+        Scalar loss tensor.
+    """
+    # Softmax on logits if not already probabilities
+    y_pred = K.softmax(y_pred, axis=-1)
+    y_true = tf.cast(y_true, dtype=y_pred.dtype)
+
+    # Flatten all dimensions except the class dimension
+    y_true_f = K.reshape(y_true, [-1, K.shape(y_true)[-1]])
+    y_pred_f = K.reshape(y_pred, [-1, K.shape(y_pred)[-1]])
+
+    # Compute the "Wasserstein" disagreement map:
+    # For each voxel/pixel, the cost is distance_matrix[argmax_true, :] * pred_probs
+    # Usually, the true label is one-hot, so argmax_true gives the class index.
+    argmax_true = tf.argmax(y_true_f, axis=-1)  # indices of ground truth for each voxel/batch
+
+    # Gather the correct row of the distance matrix for each voxel
+    distances_per_voxel = tf.gather(distance_matrix, argmax_true)
+
+    # Compute the Wasserstein distance/cost per voxel: sum_j (distance[i,j] * pred_prob[j])
+    wasserstein_map = tf.reduce_sum(distances_per_voxel * y_pred_f, axis=-1)
+
+    # Numerator & denominator for generalized Wasserstein Dice
+    numerator = tf.reduce_sum((1.0 - wasserstein_map) * tf.reduce_sum(y_true_f, axis=-1))
+    denominator = tf.reduce_sum(tf.reduce_sum(y_true_f, axis=-1) + tf.reduce_sum(y_pred_f, axis=-1))
+
+    wasserstein_dice = (2.0 * numerator + smooth) / (denominator + smooth)
+    return 1.0 - wasserstein_dice
